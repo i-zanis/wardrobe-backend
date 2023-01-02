@@ -1,16 +1,24 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.NotBlank;
 
+@MappedSuperclass
 public class Person extends BaseEntity {
   @Column(name = "first_name")
+  @NotBlank
   private String firstName;
   @Column(name = "last_name")
   private String lastName;
+  // email no validation to ease the onboarding
+  @NotBlank
+  private String email;
 
-  public Person(String firstName, String lastName) {
+  public Person(String firstName, String lastName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
+    this.email = email;
   }
 
   public Person() {
@@ -21,17 +29,23 @@ public class Person extends BaseEntity {
     return firstName;
   }
 
-  public Person setFirstName(String firstName) {
+  public void setFirstName(String firstName) {
     this.firstName = firstName;
-    return this;
   }
 
   public String getLastName() {
     return lastName;
   }
 
-  public Person setLastName(String lastName) {
+  public void setLastName(String lastName) {
     this.lastName = lastName;
-    return this;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 }

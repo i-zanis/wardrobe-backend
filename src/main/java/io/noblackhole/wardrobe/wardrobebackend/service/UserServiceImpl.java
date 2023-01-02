@@ -32,11 +32,10 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<Iterable<User>> findAll() throws UserServiceException {
+  public Iterable<User> findAll() throws UserServiceException {
     logger.info(RETRIEVING_ALL_USERS);
     try {
-      return Optional.of(userRepository.findAll());
-      // Catching specific exception == better practice
+      return userRepository.findAll();
     } catch (DataAccessException e) {
       throw new UserServiceException(ERROR_RETRIEVING_ALL_USERS, e);
     }
@@ -44,10 +43,18 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Cacheable(value = "users", key = "#id")
-  public Optional<User> findById(Long id) throws UserServiceException {
+  public User findById(Long id) throws UserServiceException {
     logger.info(RETRIEVING_USER_BY_ID, id);
+    if (id == null) {
+      throw new UserServiceException("User id cannot be null");
+    }
     try {
-      return userRepository.findById(id);
+      Optional<User> user = userRepository.findById(id);
+      if (user.isPresent()) {
+        return user.get();
+      } else {
+        throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_ID, id));
+      }
     } catch (DataAccessException e) {
       throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_ID, id), e);
     }
@@ -55,10 +62,18 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Cacheable(value = "users", key = "#email")
-  public Optional<User> findByEmail(String email) throws UserServiceException {
+  public User findByEmail(String email) throws UserServiceException {
     logger.info(RETRIEVING_USER_BY_EMAIL, email);
+    if (email == null || email.length() == 0) {
+      throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email));
+    }
     try {
-      return Optional.ofNullable(userRepository.findByEmail(email));
+      Optional<User> user = userRepository.findByEmail(email);
+      if (user.isPresent()) {
+        return user.get();
+      } else {
+        throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email));
+      }
     } catch (DataAccessException e) {
       throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email), e);
     }
@@ -66,11 +81,13 @@ public class UserServiceImpl implements UserService {
 
   @Transactional
   @Override
-  public Optional<User> save(User user) throws UserServiceException {
+  public User save(User user) throws UserServiceException {
     logger.info(SAVING_USER, user);
+    if (user == null || user.getId() == null) {
+      throw new UserServiceException(String.format(ERROR_SAVING_USER, (Object) null));
+    }
     try {
-      // user.setPassword(passwordEncoder.encode(user.getPassword()));
-      return Optional.of(userRepository.save(user));
+      return userRepository.save(user);
     } catch (DataAccessException e) {
       throw new UserServiceException(String.format(ERROR_SAVING_USER, user), e);
     }
@@ -78,8 +95,11 @@ public class UserServiceImpl implements UserService {
 
   @Transactional
   @Override
-  public Optional<User> update(User user) throws UserServiceException {
+  public User update(User user) throws UserServiceException {
     logger.info(UPDATING_USER, user);
+    if (user == null || user.getId() == null) {
+      throw new UserServiceException(String.format(ERROR_UPDATING_USER, (Object) null));
+    }
     try {
       return save(user);
     } catch (DataAccessException e) {
@@ -89,13 +109,23 @@ public class UserServiceImpl implements UserService {
 
   // TODO login
   @Override
-  public Optional<User> login(String email, String password) {
-    return Optional.empty();
+  public Boolean login(String email, String password) {
+    return null;
   }
 
   // TODO authorization
   @Override
-  public Optional<Boolean> isAuthorized(User user, String role) {
-    return Optional.empty();
+  public Boolean isAuthorized(User user, String role) {
+    return false;
+  }
+
+  @Override
+  public Boolean register(User user) {
+    return null;
+  }
+
+  @Override
+  public boolean isValid(User user) {
+    return false;
   }
 }
