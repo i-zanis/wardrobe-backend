@@ -2,17 +2,17 @@ package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @MappedSuperclass
 public class Person extends BaseEntity {
   @Column(name = "first_name")
-  @NotBlank
+  @NotBlank(message = "First name is required")
   private String firstName;
   @Column(name = "last_name")
   private String lastName;
-  // email no validation to ease the onboarding
-  @NotBlank
+  @Email(message = "Email must be valid")
   private String email;
 
   public Person(String firstName, String lastName, String email) {
