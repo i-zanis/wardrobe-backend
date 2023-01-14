@@ -5,15 +5,22 @@ import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
+@Service
 public class ItemServiceImpl implements ItemService {
   private static final Logger logger = LoggerFactory.getLogger(ItemServiceImpl.class);
   ItemRepository itemRepository;
 
+  public ItemServiceImpl(ItemRepository itemRepository) {
+    this.itemRepository = itemRepository;
+  }
+
   @Override
-  public Iterable<Item> findAllByUserId(Long id) throws ItemServiceException {
+  public List<Item> findAllByUserId(Long id) throws ItemServiceException {
     try {
       return itemRepository.findAllByUserId(id);
     } catch (Exception e) {
@@ -23,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
 
 
   @Override
-  public Iterable<Item> findAllByUserEmail(String email) throws ItemServiceException {
+  public List<Item> findAllByUserEmail(String email) throws ItemServiceException {
     logger.info("Finding all items for user with email " + email);
     try {
       return itemRepository.findAllByUserEmail(email);
