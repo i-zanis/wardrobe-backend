@@ -1,22 +1,18 @@
 package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
+import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/items")
+@RequestMapping(ItemController.BASE_URL)
 public class ItemController {
-
+  private static final String BASE_URL = "/v1/items";
   private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
   private final ItemService itemService;
 
@@ -25,58 +21,30 @@ public class ItemController {
   }
 
   @GetMapping("/all")
-  public ResponseEntity<Iterable<Item>> findAll(Long userId) {
-    try {
-      logger.info("Received request to get all items");
-      List<Item> items = itemService.findAllByUserId(userId);
-      if (items == null || items.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(null);
-      }
-      return ResponseEntity.ok(items);
-    } catch (DataAccessException e) {
-      logger.error("Error accessing database", e);
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Error getting all items");
-    }
+  @ResponseStatus(HttpStatus.OK)
+  public Iterable<Item> findAll(Long userId) throws ItemServiceException {
+    logger.info("Received request to get all items");
+    return itemService.findAllByUserId(userId);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Item> findById(@PathVariable Long id) {
-    try {
-      logger.info("Received request to get item with id {}", id);
-      Item item = itemService.findById(id);
-      if (item == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(null);
-      }
-      return ResponseEntity.ok(item);
-    } catch (DataAccessException e) {
-      logger.error("Error accessing database", e);
-      throw e;
-    } catch (Exception e) {
-      logger.error("Error getting item with id {}", id, e);
-      throw new RuntimeException("Error getting item with id " + id);
-    }
+  @ResponseStatus(HttpStatus.OK)
+  public Item findById(@PathVariable Long id) throws ItemServiceException {
+    logger.info("Received request to get item with id {}", id);
+    return itemService.findById(id);
   }
 
-  @PostMapping("/save")
-  public ResponseEntity<Item> createOrUpdate(@Valid @RequestBody Item item, BindingResult bindingResult) {
-    if (bindingResult.hasErrors()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(null);
-    }
-    try {
-      itemService.save(item);
-      return ResponseEntity.status(HttpStatus.CREATED)
-        .body(item);
-    } catch (DataAccessException e) {
-      logger.error("Error accessing database", e);
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException("Error saving item", e);
-    }
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteById(@PathVariable Long id) throws ItemServiceException {
+    logger.info("Received request to delete item with id {}", id);
+    itemService.deleteById(id);
   }
 
+  @PutMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void update(@PathVariable Long id, @Valid @RequestBody Item item) throws ItemServiceException {
+    logger.info("Received request to update item with id {}", id);
+    itemService.update(item);
+  }
 }
