@@ -10,10 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends CrudRepository<Item, Long> {
-  List<Item> findAllByUserId(Long userId);
+  List<Item> findAllByUserId(Long id);
 
-  List<Item> findAllByUserEmail(String email);
 
   @NonNull
   Optional<Item> findById(@NonNull Long id);
+
 }

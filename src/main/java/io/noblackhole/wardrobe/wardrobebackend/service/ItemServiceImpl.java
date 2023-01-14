@@ -1,6 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
+import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public List<Item> findAllByUserId(Long id) throws ItemServiceException {
+    logger.info("Finding item with userId: {}", id);
     try {
       return itemRepository.findAllByUserId(id);
     } catch (Exception e) {
@@ -30,18 +32,6 @@ public class ItemServiceImpl implements ItemService {
 
 
   @Override
-  public List<Item> findAllByUserEmail(String email) throws ItemServiceException {
-    logger.info("Finding all items for user with email " + email);
-    try {
-      return itemRepository.findAllByUserEmail(email);
-    } catch (Exception e) {
-      throw new ItemServiceException(e.getMessage());
-    }
-
-
-  }
-
-  @Override
   public Item findById(Long id) throws ItemServiceException {
     logger.info("Finding item with id " + id);
     try {
@@ -49,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
       if (item.isPresent()) {
         return item.get();
       } else {
-        throw new ItemServiceException("Item not found");
+        throw new ItemNotFoundException();
       }
     } catch (Exception e) {
       throw new ItemServiceException(e.getMessage());
@@ -58,12 +48,18 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public void save(Item item) throws ItemServiceException {
-    logger.info("Saving item " + item);
+    logger.info("Saving item {}", item);
     try {
       itemRepository.save(item);
     } catch (Exception e) {
       throw new ItemServiceException(e.getMessage());
     }
+  }
+
+  @Override
+  public void update(Item item) throws ItemServiceException {
+    logger.info("Updating item {}", item);
+    save(item);
   }
 
   @Override
