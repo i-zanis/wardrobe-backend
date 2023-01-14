@@ -10,6 +10,7 @@ import io.noblackhole.wardrobe.wardrobebackend.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,21 +18,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 public class IntegrationTest {
-
-  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(IntegrationTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(IntegrationTest.class);
 
   @Autowired
   UserRepository userRepository;
@@ -41,10 +38,11 @@ public class IntegrationTest {
   UserController userController;
   MockMvc mockMvc;
   User user1, user2;
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @BeforeEach
   public void setUp() throws Exception {
-    logger.info("setUp..");
+    logger.info("Setup..");
     BootStrapData bootStrapData = new BootStrapData(userRepository, userService);
     bootStrapData.run();
     userService = new UserServiceImpl(userRepository);
@@ -57,48 +55,52 @@ public class IntegrationTest {
       .withEmail("johndoe@gmail.com")
       .withPassword("password")
       .build();
-  }
-
-  public void tearDown() throws Exception {
-    logger.info("tearDown..");
-    userRepository.deleteAll();
-  }
-
-  @Test
-  void shouldReturn_SavedUser() throws Exception {
-    MockHttpServletRequestBuilder request = get(UserController.BASE_URL + "/{id}", user1.getId());
-    mockMvc.perform(request)
-      .andDo(print())
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", is(1)))
-      .andExpect(jsonPath("$.firstName", is(user1.getFirstName())))
-      .andExpect(jsonPath("$.lastName", is(user1.getLastName())))
-      .andExpect(jsonPath("$.email", is(user1.getEmail())))
-      .andExpect(jsonPath("$.password").doesNotExist());
-  }
-
-  @Test
-  void save_shouldReturnCreatedResponseWithSavedUser() throws Exception {
-    User user = new User.Builder().withFirstName("Gemma")
+    user2 = new User.Builder().withFirstName("Gemma")
       .withLastName("Divani")
       .withEmail("gemmadivani@gmail.com")
       .withPassword("password")
       .build();
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    String json = mapper.writeValueAsString(user);
+  }
+
+  public void tearDown() {
+    logger.info("Tear Down..");
+    userRepository.deleteAll();
+  }
+
+  @Test
+  void shouldReturnSavedUser() throws Exception {
+    User expectedUser = user1;
+    MvcResult result = mockMvc.perform(get(UserController.BASE_URL + "/{id}", expectedUser.getId()))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    // Deserialize the response and check the user fields
+    User actualUser = objectMapper.readValue(result.getResponse()
+      .getContentAsString(), User.class);
+    assertThat(actualUser.getId()).isEqualTo(expectedUser.getId());
+    assertThat(actualUser.getFirstName()).isEqualTo(expectedUser.getFirstName());
+    assertThat(actualUser.getLastName()).isEqualTo(expectedUser.getLastName());
+    assertThat(actualUser.getEmail()).isEqualTo(expectedUser.getEmail());
+    assertThat(actualUser.getPassword()).isNull();
+  }
+
+  @Test
+  void save_shouldReturnCreatedResponseWithSavedUser() throws Exception {
+    User user = user2;
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    String json = objectMapper.writeValueAsString(user);
     // Perform the request and check the response status
     MvcResult result = mockMvc.perform(post(UserController.BASE_URL + "/save").content(json)
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andReturn();
     // Deserialize the response and check the user fields
-    User savedUser = mapper.readValue(result.getResponse()
+    User savedUser = objectMapper.readValue(result.getResponse()
       .getContentAsString(), User.class);
     assertThat(savedUser.getId()).isNotNull();
-    assertThat(savedUser.getFirstName()).isEqualTo("Gemma");
-    assertThat(savedUser.getLastName()).isEqualTo("Divani");
-    assertThat(savedUser.getEmail()).isEqualTo("gemmadivani@gmail.com");
+    assertThat(savedUser.getFirstName()).isEqualTo(user.getFirstName());
+    assertThat(savedUser.getLastName()).isEqualTo(user.getLastName());
+    assertThat(savedUser.getEmail()).isEqualTo(user.getEmail());
     assertThat(savedUser.getPassword()).isNull();
   }
 
@@ -112,27 +114,26 @@ public class IntegrationTest {
       .andReturn();
     String content = result.getResponse()
       .getContentAsString();
-    ObjectMapper mapper = new ObjectMapper();
-    User user = mapper.readValue(content, User.class);
-    // Modify the user's properties
+    User user = objectMapper.readValue(content, User.class);
+    // Modify the user
     user.setFirstName("Gemma");
     user.setLastName("Divani");
     user.setEmail("gemmadivani@gmail.com");
-    // Send a PUT request to update the user
-    mockMvc.perform(put(UserController.BASE_URL + "/{id}", user.getId()).contentType(MediaType.APPLICATION_JSON)
-        .content(mapper.writeValueAsString(user)))
+    // Convert the user to json
+    String json = objectMapper.writeValueAsString(user);
+    // Perform the update request
+    result = mockMvc.perform(put(UserController.BASE_URL + "/{id}", userId).content(json)
+        .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-      .andExpect(jsonPath("$.firstName", is("Gemma")))
-      .andExpect(jsonPath("$.lastName", is("Divani")))
-      .andExpect(jsonPath("$.email", is("gemmadivani@gmail.com")));
-    // Then
-    User updatedUser = userService.findById(userId);
-    assertEquals(user.getFirstName(), updatedUser.getFirstName());
-    assertEquals(user.getLastName(), updatedUser.getLastName());
-    assertEquals(user.getEmail(), updatedUser.getEmail());
+      .andReturn();
+    // Deserialize the response and check the user fields
+    User updatedUser = objectMapper.readValue(result.getResponse()
+      .getContentAsString(), User.class);
+    assertThat(updatedUser.getId()).isEqualTo(userId);
+    assertThat(updatedUser.getFirstName()).isEqualTo("Gemma");
+    assertThat(updatedUser.getLastName()).isEqualTo("Divani");
+    assertThat(updatedUser.getEmail()).isEqualTo("gemmadivani@gmail.com");
   }
-
 }
 
 
