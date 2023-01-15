@@ -1,16 +1,17 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
 import org.springframework.stereotype.Service;
 
-@Service
+import java.util.List;
+
 public interface UserService {
-  Iterable<User> findAll() throws UserServiceException;
+  List<User> findAll() throws UserServiceException, UserNotFoundException;
 
-  User findById(Long id) throws UserServiceException;
+  User findById(Long id) throws UserServiceException, UserNotFoundException;
 
-  User findByEmail(String email) throws UserServiceException;
 
   User save(User user) throws UserServiceException;
 
