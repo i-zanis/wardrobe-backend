@@ -1,11 +1,15 @@
 package io.noblackhole.wardrobe.wardrobebackend.bootstrap;
 
+import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
+import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
+import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import io.noblackhole.wardrobe.wardrobebackend.service.UserService;
-import io.noblackhole.wardrobe.wardrobebackend.service.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -13,36 +17,38 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class BootStrapData implements CommandLineRunner {
   private static final Logger logger = LoggerFactory.getLogger(BootStrapData.class);
   UserRepository userRepository;
   UserService userService;
+  ItemRepository itemRepository;
+  ItemService itemService;
 
-  public BootStrapData(UserRepository userRepository, UserService userService) {
+  public BootStrapData(UserRepository userRepository, UserService userService, ItemRepository itemRepository, ItemService itemService) {
     this.userRepository = userRepository;
-    this.userService = new UserServiceImpl(userRepository);
-
+    this.userService = userService;
+    this.itemRepository = itemRepository;
+    this.itemService = itemService;
   }
 
   @Override
-  public void run(String... args) throws UserServiceException, UserNotFoundException {
+  public void run(String... args) throws UserServiceException, UserNotFoundException, ItemServiceException {
     logger.info("Loading bootstrap data");
     List<User> users = new ArrayList<>();
     try {
       users = userService.findAll();
     } catch (UserNotFoundException e) {
-      logger.error("No users found in the DB");
+      logger.info("No users found, creating users");
     }
     if (users.isEmpty()) getUsers();
-    ;
     logger.info("Bootstrap data loaded");
     logger.info("-------------------------------");
-
   }
 
-  private void getUsers() throws UserServiceException, UserNotFoundException {
+  private void getUsers() throws UserServiceException, UserNotFoundException, ItemServiceException {
     User user1 = new User.Builder()
       .withId(1L)
       .withFirstName("John")
@@ -78,22 +84,19 @@ public class BootStrapData implements CommandLineRunner {
     userService.save(user3);
     userService.save(user4);
 
-
+    Item item = new Item.Builder()
+      .withId(21L)
+      .withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withUser(user1)
+      .build();
+//    user1.addItem(item);
+//    itemService.save(item);
+//    List<Item> items = itemService.findAllByUserId(user1.getId());
+//    logger.info("User {} has {} {}.", user1.getFirstName(), items.size(), items.get(0)
+//      .getName());
     List<User> users = userService.findAll();
-    logger.info("Users found: " + users.size());
+    logger.info("Boostrap users found: {}", users.size());
+//    logger.info("Boostrap items found: {}", items.size());
     logger.info("-------------------------------");
-    assert users.size() == 4;
-    assert users.get(0)
-      .getFirstName()
-      .equals("John");
-    assert users.get(0)
-      .getLastName()
-      .equals("Doe");
-    assert users.get(0)
-      .getEmail()
-      .equals("johndoe@gmail.com");
-    assert users.get(0)
-      .getPassword()
-      .equals("password");
   }
 }
