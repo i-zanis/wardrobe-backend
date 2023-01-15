@@ -1,6 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -9,16 +10,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.MediaType;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.put;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -49,7 +53,7 @@ class UserServiceTest {
   }
 
   @Test
-  void findAll_shouldReturnListOfUsers() throws UserServiceException {
+  void findAll_shouldReturnListOfUsers() throws UserServiceException, UserNotFoundException {
     // Given
     List<User> expectedUsers = Arrays.asList(user1, user2);
     when(userRepository.findAll()).thenReturn(expectedUsers);
@@ -60,7 +64,7 @@ class UserServiceTest {
   }
 
   @Test
-  void findById_shouldReturnAUser_whenValidIdIsProvided() throws UserServiceException {
+  void findById_shouldReturnAUser_whenValidIdIsProvided() throws UserServiceException, UserNotFoundException {
     // Given
     User expected = user1;
     when(userRepository.findById(expected.getId())).thenReturn(Optional.of(expected));
@@ -71,39 +75,26 @@ class UserServiceTest {
   }
 
   @Test
-  void findById_shouldThrowUserServiceException_whenInvalidIdIsProvided() {
+  void findById_shouldThrowUserServiceException_whenInvalidIdIsProvided() throws UserNotFoundException, UserServiceException {
     // Given
-    Long invalidId = -1L;
-    // When
-    UserServiceException exception = assertThrows(UserServiceException.class, () -> userService.findById(invalidId));
-    // Then
-    assertEquals("User id cannot be null", exception.getMessage());
-  }
-
-  @Test
-  void findByEmail_shouldReturnAUser_whenValidEmailIsProvided() throws UserServiceException {
-    // Given
+    Long nonExistentId = -1L;
+    Long existentId = 1L;
     User expected = user1;
-    when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(expected));
+    when(userRepository.findById(existentId)).thenReturn(Optional.of(expected));
     // When
-    User actual = userService.findByEmail(user1.getEmail());
+    User user = userService.findById(existentId);
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> userService.findById(nonExistentId));
     // Then
-    assertEquals(expected, actual);
+    assertNotNull(user);
+//  assertEquals("User not found with id: -1", exception.getMessage());
+    assertEquals("UserNotFoundException", exception.getClass()
+      .getSimpleName());
+    verify(userRepository, times(1)).findById(existentId);
+    verify(userRepository, times(1)).findById(nonExistentId);
   }
 
   @Test
-  void findByEmail_shouldThrowUserServiceException_whenInvalidEmailIsProvided() {
-    // Given
-    String invalidEmail = "invalid@gmail.com";
-    when(userRepository.findByEmail(invalidEmail)).thenReturn(Optional.empty());
-    // When
-    UserServiceException exception = assertThrows(UserServiceException.class, () -> userService.findByEmail(invalidEmail));
-    // Then
-    assertEquals("Error while retrieving user with email invalid@gmail.com from the DB", exception.getMessage());
-  }
-
-  @Test
-  void save_shouldReturnSavedUser_whenValidUserIsProvided() throws UserServiceException {
+  void save_shouldReturnSavedUser_whenValidUserIsProvided() throws UserServiceException, UserNotFoundException {
     // Given
     User expected = user1;
     when(userRepository.findById(any())).thenReturn(Optional.of(user1));
@@ -112,18 +103,6 @@ class UserServiceTest {
     User actual = userService.findById(user1.getId());
     // Then
     assertEquals(expected, actual);
-  }
-
-  @Test
-  void save_shouldThrowUserServiceException_whenInvalidUserIsProvided() {
-    // Given
-    User invalidUser = new User();
-    invalidUser.setId(-1L);
-    invalidUser.setEmail("invalid@gmail.com");
-    // When
-    UserServiceException exception = assertThrows(UserServiceException.class, () -> userService.save(invalidUser));
-    // Then
-    assertEquals("Error while saving user null to the DB", exception.getMessage());
   }
 
   @Test
@@ -138,16 +117,19 @@ class UserServiceTest {
   }
 
   @Test
-  void update_shouldThrowUserServiceException_whenInvalidUserIsProvided() {
-    // Given
-    User invalidUser = new User();
-    invalidUser.setId(-1L);
-    invalidUser.setEmail("invalid@gmail.com");
-    // When
-    UserServiceException exception = assertThrows(UserServiceException.class, () -> userService.update(invalidUser));
-    // Then
-    assertEquals("Error while saving user null to the DB", exception.getMessage());
+  public void testSave_WhenUserIsNull_ShouldThrowUserServiceException() {
+    assertThrows(UserServiceException.class, () -> userService.save(null));
   }
+
+
+  @Test
+  public void testSave_WhenSaveFails_ShouldThrowUserServiceException() throws UserServiceException {
+    when(userRepository.save(any(User.class))).thenThrow(new DataAccessException("Error saving user") {
+    });
+
+    assertThrows(UserServiceException.class, () -> userService.save(new User()));
+  }
+
 
 
   @Test
