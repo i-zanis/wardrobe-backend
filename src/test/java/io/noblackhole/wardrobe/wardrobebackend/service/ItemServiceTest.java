@@ -1,9 +1,11 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
+import io.noblackhole.wardrobe.wardrobebackend.TestItem;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,7 +100,7 @@ class ItemServiceTest {
   }
 
   @Test
-  void findById() throws ItemServiceException {
+  void findById() throws ItemServiceException, ItemNotFoundException {
     User user = user1;
     Item item = item1;
     user.addItem(item);
@@ -114,29 +117,46 @@ class ItemServiceTest {
   }
 
   @Test
-  void testSave() throws ItemServiceException {
-    Item item = item1;
-    item.setNotes("New Item");
+  void save_validItem_shouldApply() throws ItemServiceException {
+    Item item = TestItem.create1();
     when(itemRepository.save(item)).thenReturn(item);
     itemService.save(item);
     verify(itemRepository, times(1)).save(item);
   }
 
   @Test
-  void testUpdate() throws ItemServiceException {
-    Item item = item1;
+  void save_invalidItem_shouldFail() {
+    Item item = TestItem.create1();
+    item.setUser(null);
+    assertThatExceptionOfType(ItemServiceException.class)
+      .isThrownBy(() -> itemService.save(item));
+    verify(itemRepository, times(0)).save(item);
+  }
+
+  @Test
+  void update_validItem_shouldApply() throws ItemServiceException {
+    Item item = TestItem.create1();
     when(itemRepository.save(item)).thenReturn(item);
-    item.setNotes("New Item");
     itemService.update(item);
     verify(itemRepository, times(1)).save(item);
   }
 
   @Test
-  void deleteById() throws ItemServiceException {
+  void delete_validId_shouldApply() throws ItemServiceException {
     Long id = 1L;
     doNothing().when(itemRepository)
       .deleteById(id);
     itemService.deleteById(id);
     verify(itemRepository, times(1)).deleteById(id);
   }
+
+  @Test
+  void update_invalidItem_shouldThrowException() {
+    Item item = TestItem.create1();
+    item.setUser(null);
+    assertThatExceptionOfType(ItemServiceException.class)
+      .isThrownBy(() -> itemService.update(item));
+    verify(itemRepository, times(0)).save(item);
+  }
+
 }

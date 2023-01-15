@@ -1,6 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
+import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import jakarta.validation.Valid;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ItemController.BASE_URL)
 public class ItemController {
-  private static final String BASE_URL = "/v1/items";
+  static final String BASE_URL = "/v1/items";
   private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
   private final ItemService itemService;
 
@@ -20,23 +21,23 @@ public class ItemController {
     this.itemService = itemService;
   }
 
-  @GetMapping("/all")
+  @GetMapping("/all/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  public Iterable<Item> findAll(Long userId) throws ItemServiceException {
+  public Iterable<Item> findAll(@PathVariable Long userId) throws ItemServiceException {
     logger.info("Received request to get all items");
     return itemService.findAllByUserId(userId);
   }
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public Item findById(@PathVariable Long id) throws ItemServiceException {
+  public Item findById(@PathVariable Long id) throws ItemServiceException, ItemNotFoundException {
     logger.info("Received request to get item with id {}", id);
     return itemService.findById(id);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteById(@PathVariable Long id) throws ItemServiceException {
+  public void delete(@PathVariable Long id) throws ItemServiceException {
     logger.info("Received request to delete item with id {}", id);
     itemService.deleteById(id);
   }
@@ -46,5 +47,12 @@ public class ItemController {
   public void update(@PathVariable Long id, @Valid @RequestBody Item item) throws ItemServiceException {
     logger.info("Received request to update item with id {}", id);
     itemService.update(item);
+  }
+
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public Item save(@Valid @RequestBody Item item) throws ItemServiceException {
+    logger.info("Received request to create item: {}", item);
+    return itemService.save(item);
   }
 }

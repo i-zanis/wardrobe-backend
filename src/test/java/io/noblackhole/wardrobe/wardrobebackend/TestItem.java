@@ -15,7 +15,8 @@ public class TestItem extends Item {
       user = TestUser.create1();
     }
     Category category1 = new Category(1L, "Footwear");
-    return new Builder().withId(11L)
+    return new Builder()
+      .withId(11L)
       .withBrand("Hallmark Devilson")
       .withCategory(category1)
       .withColors(Set.of(Color.BLUE, Color.RED))

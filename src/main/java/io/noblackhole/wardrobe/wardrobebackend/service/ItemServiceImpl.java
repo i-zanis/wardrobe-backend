@@ -26,40 +26,43 @@ public class ItemServiceImpl implements ItemService {
     try {
       return itemRepository.findAllByUserId(id);
     } catch (Exception e) {
-      throw new ItemServiceException(e.getMessage());
+      throw new ItemServiceException("Error finding items with userId: " + id, e);
     }
   }
 
 
   @Override
-  public Item findById(Long id) throws ItemServiceException {
+  public Item findById(Long id) throws ItemServiceException, ItemNotFoundException {
     logger.info("Finding item with id " + id);
     try {
       Optional<Item> item = itemRepository.findById(id);
       if (item.isPresent()) {
         return item.get();
-      } else {
-        throw new ItemNotFoundException();
       }
+      throw new ItemNotFoundException();
     } catch (Exception e) {
-      throw new ItemServiceException(e.getMessage());
+      throw new ItemNotFoundException("Error finding item with id: " + id, e);
     }
   }
 
   @Override
-  public void save(Item item) throws ItemServiceException {
-    logger.info("Saving item {}", item);
+  public Item save(Item item) throws ItemServiceException {
+    logger.info("Saving item {} ", item);
+    // @NotNull on User inside Item model caused problems - added check here
+    if (item.getUser() == null) {
+      throw new ItemServiceException("User is required");
+    }
     try {
-      itemRepository.save(item);
+      return itemRepository.save(item);
     } catch (Exception e) {
-      throw new ItemServiceException(e.getMessage());
+      throw new ItemServiceException("Item cannot be saved", e);
     }
   }
 
   @Override
-  public void update(Item item) throws ItemServiceException {
+  public Item update(Item item) throws ItemServiceException {
     logger.info("Updating item {}", item);
-    save(item);
+    return save(item);
   }
 
   @Override
@@ -68,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
     try {
       itemRepository.deleteById(id);
     } catch (Exception e) {
-      throw new ItemServiceException(e.getMessage());
+      throw new ItemServiceException("Item cannot be deleted", e);
     }
   }
 }
