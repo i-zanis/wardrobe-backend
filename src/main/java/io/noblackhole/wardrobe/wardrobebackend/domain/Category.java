@@ -14,31 +14,34 @@ public class Category extends BaseEntity {
     this.item = item;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public Category setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public Item getItem() {
-    return item;
-  }
-
-  public Category setItem(Item item) {
-    this.item = item;
-    return this;
-  }
-
   public Category(Long id, String name, Item item) {
     super(id);
     this.name = name;
     this.item = item;
   }
 
+  public Category(Long id, String name) {
+    super(id);
+    this.name = name;
+  }
+
   public Category() {
 
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Item getItem() {
+    return item;
+  }
+
+  public void setItem(Item item) {
+    this.item = item;
   }
 }
