@@ -1,10 +1,13 @@
 package io.noblackhole.wardrobe.wardrobebackend.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -12,14 +15,40 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(DataAccessException.class)
   public ResponseEntity<String> handleDataAccessException(DataAccessException e) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .body(e.getMessage());
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+      .body(e.getMessage());
+  }
+
+  @ExceptionHandler(UserServiceException.class)
+  public ResponseEntity<String> handleUserServiceException(UserServiceException e) {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .body(e.getMessage());
+  }
+
+  @ExceptionHandler(ItemServiceException.class)
+  public ResponseEntity<String> handleItemServiceException(ItemServiceException e) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+      .body(e.getMessage());
+  }
+
+  @ExceptionHandler(ItemNotFoundException.class)
+  public ResponseEntity<String> handleItemNotFoundException(ItemNotFoundException e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
       .body(e.getMessage());
   }
 
@@ -30,17 +59,19 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+    Map<String, Object> errors = new HashMap<>(8);
+    e.getBindingResult()
+      .getAllErrors()
+      .forEach(error -> {
+        String fieldName = ((FieldError) error).getField();
+        String errorMessage = error.getDefaultMessage();
+        errors.put(fieldName, errorMessage);
+      });
+    ErrorResponse errorResponse = new ErrorResponse(request.getRequestURI(), errors);
+    logger.error("MethodArgumentNotValidException:" + e.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-      .body(Objects.requireNonNull(e.getBindingResult()
-          .getFieldError())
-        .getDefaultMessage());
-  }
-
-  @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-      .body("Invalid request body");
+      .body(errorResponse);
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -66,4 +97,5 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
       .body(e.getMessage());
   }
+
 }
