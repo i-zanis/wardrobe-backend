@@ -7,11 +7,23 @@ public class UserServiceException extends Exception {
     super(message);
   }
 
+  public UserServiceException() {
+  }
+
   public UserServiceException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public UserServiceException(String s, DataAccessException e, String message) {
-
+  public UserServiceException(Throwable cause) {
+    super(cause);
   }
+
+  public UserServiceException(DataAccessException e) {
+    super(e);
+  }
+
+  public UserServiceException(String message, DataAccessException e) {
+    super(message, e);
+  }
+
 }
