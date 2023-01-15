@@ -4,6 +4,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.validation.constraints.Positive;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
 public class BaseEntity implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Positive
   private Long id;
 
   public BaseEntity() {
@@ -24,7 +26,8 @@ public class BaseEntity implements Serializable {
     return id;
   }
 
-  public boolean isNew() {
-    return this.id == null;
+  public void setId(Long id) {
+    this.id = id;
   }
+
 }
