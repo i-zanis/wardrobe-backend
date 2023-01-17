@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.noblackhole.wardrobe.wardrobebackend.bootstrap.BootStrapData;
+import io.noblackhole.wardrobe.wardrobebackend.controller.ItemController;
 import io.noblackhole.wardrobe.wardrobebackend.controller.UserController;
+import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.exception.GlobalExceptionHandler;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
@@ -30,6 +32,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,7 +54,8 @@ public class IntegrationTest {
   ItemRepository itemRepository;
   @Autowired
   ItemService itemService;
-
+  @Autowired
+  ItemController itemController;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -60,7 +64,7 @@ public class IntegrationTest {
     bootStrapData.run();
     userService = new UserServiceImpl(userRepository);
     userController = new UserController(userService);
-    mockMvc = MockMvcBuilders.standaloneSetup(userController, GlobalExceptionHandler.class)
+    mockMvc = MockMvcBuilders.standaloneSetup(userController, itemController, GlobalExceptionHandler.class)
       .build();
     user1 = new User.Builder().withId(1L)
       .withFirstName("John")
@@ -79,6 +83,7 @@ public class IntegrationTest {
   void findAll_shouldReturnAllUsers() throws Exception {
     User user = user1;
     MvcResult result = mockMvc.perform(get(UserController.BASE_URL + "/all"))
+      .andDo(print())
       .andExpect(status().isOk())
       .andReturn();
     List<User> actualUsers = objectMapper.readValue(result.getResponse()
@@ -101,6 +106,7 @@ public class IntegrationTest {
   void shouldReturnUserById() throws Exception {
     User expectedUser = user1;
     MvcResult result = mockMvc.perform(get(UserController.BASE_URL + "/{id}", expectedUser.getId()))
+      .andDo(print())
       .andExpect(status().isOk())
       .andReturn();
     // Deserialize the response and check the user fields
@@ -138,6 +144,7 @@ public class IntegrationTest {
     long userId = 1L;
     // Get the user by id
     MvcResult result = mockMvc.perform(get(UserController.BASE_URL + "/{id}", userId))
+      .andDo(print())
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
       .andReturn();
@@ -162,6 +169,50 @@ public class IntegrationTest {
     assertThat(updatedUser.getFirstName()).isEqualTo("Gemma");
     assertThat(updatedUser.getLastName()).isEqualTo("Divani");
     assertThat(updatedUser.getEmail()).isEqualTo("gemmadivani@gmail.com");
+  }
+
+  @Test
+  void findAllByUserId_shouldReturnAllItemsForGivenUser() throws Exception {
+    Long userId = user1.getId();
+    String url = ItemController.BASE_URL + "/all/{userId}";
+    MvcResult result = mockMvc.perform(get(url, userId))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andReturn();
+    List<Item> actualItems = objectMapper.readValue(result.getResponse()
+      .getContentAsString(), new TypeReference<>() {
+    });
+    assertThat(actualItems.size()).isEqualTo(2);
+//    assertThat(actualItems.get(0)
+//      .getUser()
+//      .getId()).isEqualTo(userId);
+  }
+
+  @Test
+  void findById_shouldReturnItemForGivenId() throws Exception {
+    Long itemId = 1L;
+    Item expectedItem = itemService.findById(itemId);
+//    String url = ItemController.BASE_URL;
+    MvcResult result = mockMvc.perform(get(ItemController.BASE_URL + "/{id}", expectedItem.getId()))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andReturn();
+    Item actualItem = objectMapper.readValue(result.getResponse()
+      .getContentAsString(), Item.class);
+    assertThat(actualItem.getId()).isEqualTo(expectedItem.getId());
+    assertThat(actualItem.getColors()).isEqualTo(expectedItem.getColors());
+    assertThat(actualItem.getNotes()).isEqualTo(expectedItem.getNotes());
+//    assertThat(actualItem.getUser()).isEqualTo(expectedItem.getUser());
+  }
+
+  @Test
+  void delete_shouldReturnNoContentResponse() throws Exception {
+    Item item = itemRepository.findAll().iterator()
+      .next();
+    mockMvc.perform(delete(ItemController.BASE_URL + "/{id}", item.getId()))
+      .andExpect(status().isNoContent());
+    assertThat(itemRepository.findById(item.getId())
+      .isEmpty()).isTrue();
   }
 }
 
