@@ -1,6 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,10 +34,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Iterable<User> findAll() throws UserServiceException {
+  public List<User> findAll() throws UserServiceException, UserNotFoundException {
     logger.info(RETRIEVING_ALL_USERS);
     try {
-      return userRepository.findAll();
+      List<User> users = userRepository.findAll();
+      logger.info("Found {} users", users.size());
+      if (users.isEmpty()) {
+        throw new UserNotFoundException();
+      }
+      return users;
     } catch (DataAccessException e) {
       throw new UserServiceException(ERROR_RETRIEVING_ALL_USERS, e);
     }
@@ -43,39 +50,18 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Cacheable(value = "users", key = "#id")
-  public User findById(Long id) throws UserServiceException {
+  public User findById(Long id) throws UserServiceException, UserNotFoundException {
     logger.info(RETRIEVING_USER_BY_ID, id);
-    if (id == null) {
-      throw new UserServiceException("User id cannot be null");
-    }
     try {
       Optional<User> user = userRepository.findById(id);
       if (user.isPresent()) {
+        logger.info("Found user: {} {}", user.get().getId(), user.get().getFirstName());
         return user.get();
       } else {
-        throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_ID, id));
+        throw new UserNotFoundException();
       }
     } catch (DataAccessException e) {
       throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_ID, id), e);
-    }
-  }
-
-  @Override
-  @Cacheable(value = "users", key = "#email")
-  public User findByEmail(String email) throws UserServiceException {
-    logger.info(RETRIEVING_USER_BY_EMAIL, email);
-    if (email == null || email.length() == 0) {
-      throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email));
-    }
-    try {
-      Optional<User> user = userRepository.findByEmail(email);
-      if (user.isPresent()) {
-        return user.get();
-      } else {
-        throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email));
-      }
-    } catch (DataAccessException e) {
-      throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_EMAIL, email), e);
     }
   }
 
@@ -83,8 +69,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public User save(User user) throws UserServiceException {
     logger.info(SAVING_USER, user);
-    if (user == null || user.getId() == null) {
-      throw new UserServiceException(String.format(ERROR_SAVING_USER, (Object) null));
+    if (user == null) {
+      throw new UserServiceException("User cannot be null");
     }
     try {
       return userRepository.save(user);
@@ -97,9 +83,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public User update(User user) throws UserServiceException {
     logger.info(UPDATING_USER, user);
-    if (user == null || user.getId() == null) {
-      throw new UserServiceException(String.format(ERROR_UPDATING_USER, (Object) null));
-    }
+    // The invalid data checks are inside save()
     try {
       return save(user);
     } catch (DataAccessException e) {
