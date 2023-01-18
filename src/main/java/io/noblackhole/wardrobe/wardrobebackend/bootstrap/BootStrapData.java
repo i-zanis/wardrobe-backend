@@ -49,31 +49,27 @@ public class BootStrapData implements CommandLineRunner {
   }
 
   private void getUsers() throws UserServiceException, UserNotFoundException, ItemServiceException {
-    User user1 = new User.Builder()
-      .withId(1L)
+    User user1 = new User.Builder().withId(1L)
       .withFirstName("John")
       .withLastName("Doe")
       .withEmail("johndoe@gmail.com")
       .withPassword("password")
       .build();
 
-    User user2 = new User.Builder()
-      .withId(2L)
+    User user2 = new User.Builder().withId(2L)
       .withFirstName("Jane")
       .withLastName("Doe")
       .withEmail("janedoe@gmail.com")
       .withPassword("password")
       .build();
 
-    User user3 = new User.Builder()
-      .withFirstName("John")
+    User user3 = new User.Builder().withFirstName("John")
       .withLastName("Smith")
       .withEmail("johnsmith@gmail.com")
       .withPassword("password")
       .build();
 
-    User user4 = new User.Builder()
-      .withFirstName("Jane")
+    User user4 = new User.Builder().withFirstName("Jane")
       .withLastName("Smith")
       .withEmail("janesmith@gmail.com")
       .withPassword("password")
@@ -84,19 +80,27 @@ public class BootStrapData implements CommandLineRunner {
     userService.save(user3);
     userService.save(user4);
 
-    Item item = new Item.Builder()
-      .withId(21L)
+    Item item1 = new Item.Builder().withId(21L)
       .withColors(Set.of(Color.BLUE, Color.WHITE))
       .withUser(user1)
       .build();
-//    user1.addItem(item);
-//    itemService.save(item);
-//    List<Item> items = itemService.findAllByUserId(user1.getId());
-//    logger.info("User {} has {} {}.", user1.getFirstName(), items.size(), items.get(0)
-//      .getName());
+
+    Item item2 = new Item.Builder().withId(22L)
+      .withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withUser(user1)
+      .build();
+    user1.getItems().add(item1);
+    user1.getItems().add(item2);
+    userService.save(user1);
+    List<Item> items = itemService.findAllByUserId(user1.getId());
+    logger.info("User {} has {} {}.", user1.getFirstName(), items.size(), items.get(0));
     List<User> users = userService.findAll();
     logger.info("Boostrap users found: {}", users.size());
-//    logger.info("Boostrap items found: {}", items.size());
+    logger.info("Boostrap items found: {}", items.size());
+    List<Item> items1 = (List<Item>) itemRepository.findAll();
+    for (Item item : items1) {
+      logger.info("Item: {} {}", item, item.getId(), item.getUser().getId());
+    }
     logger.info("-------------------------------");
   }
 }
