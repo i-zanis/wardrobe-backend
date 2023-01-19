@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "items")
@@ -16,7 +19,7 @@ public class Item extends BaseEntity {
   private String brand;
   @OneToOne
   private Category category;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
   @JoinColumn(name = "user_id")
   private User user;
@@ -36,6 +39,23 @@ public class Item extends BaseEntity {
 
   public void addColor(Color color) {
     colors.add(color);
+  }
+
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", Item.class.getSimpleName() + "[", "]")
+      .add("colors=" + colors)
+      .add("brand='" + brand + "'")
+      .add("category=" + category)
+      .add("user=" + user)
+      .add("price=" + price)
+      .add("image=" + Arrays.toString(image))
+      .add("material='" + material + "'")
+      .add("location='" + location + "'")
+      .add("care='" + care + "'")
+      .add("notes='" + notes + "'")
+      .toString();
   }
 
   public Set<Color> getColors() {
