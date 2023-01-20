@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ItemController.BASE_URL)
 public class ItemController {
-  static final String BASE_URL = "/v1/items";
+  public static final String BASE_URL = "/v1/items";
   private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
   private final ItemService itemService;
 
@@ -55,4 +55,5 @@ public class ItemController {
     logger.info("Received request to create item: {}", item);
     return itemService.save(item);
   }
+
 }
