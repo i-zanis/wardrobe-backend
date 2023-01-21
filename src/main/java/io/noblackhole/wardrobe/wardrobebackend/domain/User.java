@@ -6,8 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -17,11 +16,19 @@ public class User extends Person {
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
-  @JsonManagedReference
-  private List<Item> items = new ArrayList<>();
+  private Set<Item> items = new HashSet<>();
 
   public User() {
 
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+      .add("preferences=" + preferences)
+      .add("password='" + password + "'")
+      .add("items=" + items)
+      .toString();
   }
 
   public User(String firstName, String lastName, String email, Preferences preferences, String password) {
@@ -51,15 +58,15 @@ public class User extends Person {
     this.password = password;
   }
 
-  public List<Item> getItems() {
+  public Set<Item> getItems() {
 //     TODO check if it needs removing after tests pass
     if (items == null) {
-      items = new ArrayList<>();
+      items = new HashSet<>();
     }
     return items;
   }
 
-  public void setItems(List<Item> items) {
+  public void setItems(Set<Item> items) {
     this.items = items;
   }
 
@@ -75,7 +82,7 @@ public class User extends Person {
     private @Email String email;
     private Preferences preferences;
     private String password;
-    private List<Item> items;
+    private Set<Item> items;
 
     public Builder() {
     }
@@ -114,7 +121,7 @@ public class User extends Person {
       return this;
     }
 
-    public Builder withItems(List<Item> items) {
+    public Builder withItems(Set<Item> items) {
       this.items = items;
       return this;
     }
