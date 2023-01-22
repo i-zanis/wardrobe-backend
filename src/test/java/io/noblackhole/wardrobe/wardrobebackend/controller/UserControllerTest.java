@@ -138,7 +138,7 @@ public class UserControllerTest {
     User expectedUser = TestUser.create1();
     when(userService.update(expectedUser)).thenReturn(expectedUser);
     String json = objectMapper.writeValueAsString(expectedUser);
-    mockMvc.perform(put(UserController.BASE_URL + expectedUser.getId()).content(json)
+    mockMvc.perform(put(UserController.BASE_URL + "/" + expectedUser.getId()).content(json)
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
