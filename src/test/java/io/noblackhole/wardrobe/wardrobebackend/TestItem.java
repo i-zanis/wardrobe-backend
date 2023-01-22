@@ -14,9 +14,9 @@ public class TestItem extends Item {
     if (user == null) {
       user = TestUser.create1();
     }
-    Category category1 = new Category(1L, "Footwear");
-    return new Builder()
-      .withId(11L)
+
+    Category category1 = Category.SHOES;
+    return new Builder().withId(11L)
       .withBrand("Hallmark Devilson")
       .withCategory(category1)
       .withColors(Set.of(Color.BLUE, Color.RED))
@@ -37,7 +37,7 @@ public class TestItem extends Item {
     if (user == null) {
       user = TestUser.create2();
     }
-    Category category = new Category(1L, "Dress");
+    Category category = Category.BOTTOM;
     return new Item.Builder().withId(12L)
       .withBrand("Mystic's Fate")
       .withCategory(category)

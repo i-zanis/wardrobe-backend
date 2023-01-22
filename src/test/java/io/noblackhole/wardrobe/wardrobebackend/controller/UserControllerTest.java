@@ -1,11 +1,12 @@
 package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.noblackhole.wardrobe.wardrobebackend.TestUser;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.exception.GlobalExceptionHandler;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.service.UserService;
-import io.noblackhole.wardrobe.wardrobebackend.utils.Constants;
+import io.noblackhole.wardrobe.wardrobebackend.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,26 +121,28 @@ public class UserControllerTest {
     verify(userService, times(0)).update(any());
   }
 
-//  @Test
-//  void shouldReturnCreatedResponseWithSavedUser() throws Exception {
-//    User expectedUser = user1;
-//    when(userService.save(expectedUser)).thenReturn(expectedUser);
-//    String json = objectMapper.writeValueAsString(expectedUser);
-//    mockMvc.perform(post(UserController.BASE_URL + "/save").content(json)
-//        .contentType(MediaType.APPLICATION_JSON))
-//      .andExpect(status().isCreated())
-//      .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
-//  }
-//  @Test
-//  void shouldReturnOkResponseWithUpdatedUser() throws Exception {
-//    User expectedUser = user1;
-//    when(userService.update(expectedUser)).thenReturn(expectedUser);
-//    String json = objectMapper.writeValueAsString(expectedUser);
-//    mockMvc.perform(put(UserController.BASE_URL + "/1").content(json)
-//        .contentType(MediaType.APPLICATION_JSON))
-//      .andExpect(status().isOk())
-//      .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
-//  }
+  @Test
+  void save_validUser_shouldReturnCreatedResponseWithSavedUser() throws Exception {
+    User expectedUser = TestUser.create1();
+    when(userService.save(expectedUser)).thenReturn(expectedUser);
+    String json = objectMapper.writeValueAsString(expectedUser);
+    mockMvc.perform(post(UserController.BASE_URL).content(json)
+        .contentType(MediaType.APPLICATION_JSON))
+      .andDo(print())
+      .andExpect(status().isCreated())
+      .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
+  }
+
+  @Test
+  void update_validUser_shouldReturnOkResponseWithUpdatedUser() throws Exception {
+    User expectedUser = TestUser.create1();
+    when(userService.update(expectedUser)).thenReturn(expectedUser);
+    String json = objectMapper.writeValueAsString(expectedUser);
+    mockMvc.perform(put(UserController.BASE_URL + expectedUser.getId()).content(json)
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
+  }
 
 //  @Test
 //  void shouldReturnBadRequestResponse_WhenUserInputIsInvalid() throws Exception {
