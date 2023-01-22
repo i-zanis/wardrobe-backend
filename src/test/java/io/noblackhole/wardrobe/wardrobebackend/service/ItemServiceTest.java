@@ -36,7 +36,7 @@ class ItemServiceTest {
 
   @BeforeEach
   void setUp() {
-    category1 = new Category(1L, "Footwear");
+    category1 = Category.SHOES;
     item1 = new Item.Builder().withId(11L)
       .withBrand("Hallmark Devilson")
       .withCategory(category1)

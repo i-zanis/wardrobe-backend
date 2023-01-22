@@ -2,9 +2,7 @@ package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,8 +15,12 @@ public class Item extends BaseEntity {
   @Enumerated
   private Set<Color> colors = new HashSet<>();
   private String brand;
-  @OneToOne
+  @Enumerated(EnumType.STRING)
   private Category category;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "look_id")
+  private Look look;
+  private boolean isFavorite;
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
   @JoinColumn(name = "user_id")
@@ -33,19 +35,63 @@ public class Item extends BaseEntity {
   private String care;
   private String notes;
 
+  public Item(Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String material, String location, String care, String notes) {
+    this.colors = colors;
+    this.brand = brand;
+    this.category = category;
+    this.look = look;
+    this.isFavorite = isFavorite;
+    this.user = user;
+    this.price = price;
+    this.image = image;
+    this.material = material;
+    this.location = location;
+    this.care = care;
+    this.notes = notes;
+  }
+
+  public Item(Long id, Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String material, String location, String care, String notes) {
+    super(id);
+    this.colors = colors;
+    this.brand = brand;
+    this.category = category;
+    this.look = look;
+    this.isFavorite = isFavorite;
+    this.user = user;
+    this.price = price;
+    this.image = image;
+    this.material = material;
+    this.location = location;
+    this.care = care;
+    this.notes = notes;
+  }
+
   public Item() {
   }
 
+  public Look getLook() {
+    return look;
+  }
+
+  public void setLook(Look look) {
+    this.look = look;
+  }
+
+  public boolean isFavorite() {
+    return isFavorite;
+  }
+
+  public void setFavorite(boolean favorite) {
+    isFavorite = favorite;
+  }
 
   public void addColor(Color color) {
     colors.add(color);
   }
 
-
   @Override
   public String toString() {
-    return new StringJoiner(", ", Item.class.getSimpleName() + "[", "]")
-      .add("colors=" + colors)
+    return new StringJoiner(", ", Item.class.getSimpleName() + "[", "]").add("colors=" + colors)
       .add("brand='" + brand + "'")
       .add("category=" + category)
       .add("user=" + user)
@@ -66,7 +112,6 @@ public class Item extends BaseEntity {
     this.colors = colors;
   }
 
-
   public String getBrand() {
     return brand;
   }
@@ -74,7 +119,6 @@ public class Item extends BaseEntity {
   public void setBrand(String brand) {
     this.brand = brand;
   }
-
 
   public Category getCategory() {
     return category;
@@ -128,6 +172,10 @@ public class Item extends BaseEntity {
     return care;
   }
 
+  public void setCare(String care) {
+    this.care = care;
+  }
+
   public String getNotes() {
     return notes;
   }
@@ -141,11 +189,14 @@ public class Item extends BaseEntity {
     private Set<Color> colors;
     private String brand;
     private Category category;
+    private Look look;
+    private boolean isFavorite;
     private User user;
     private Double price;
     private Byte[] image;
     private String material;
     private String location;
+    private String care;
     private String notes;
 
     public Builder() {
@@ -175,6 +226,16 @@ public class Item extends BaseEntity {
       return this;
     }
 
+    public Builder withLook(Look look) {
+      this.look = look;
+      return this;
+    }
+
+    public Builder withIsFavorite(boolean isFavorite) {
+      this.isFavorite = isFavorite;
+      return this;
+    }
+
     public Builder withUser(User user) {
       this.user = user;
       return this;
@@ -200,6 +261,10 @@ public class Item extends BaseEntity {
       return this;
     }
 
+    public Builder withCare(String care) {
+      this.care = care;
+      return this;
+    }
 
     public Builder withNotes(String notes) {
       this.notes = notes;
@@ -207,17 +272,8 @@ public class Item extends BaseEntity {
     }
 
     public Item build() {
-      Item item = new Item();
+      Item item = new Item(colors, brand, category, look, isFavorite, user, price, image, material, location, care, notes);
       item.setId(id);
-      item.setColors(colors);
-      item.setBrand(brand);
-      item.setCategory(category);
-      item.setUser(user);
-      item.setPrice(price);
-      item.setImage(image);
-      item.setMaterial(material);
-      item.setLocation(location);
-      item.setNotes(notes);
       return item;
     }
   }
