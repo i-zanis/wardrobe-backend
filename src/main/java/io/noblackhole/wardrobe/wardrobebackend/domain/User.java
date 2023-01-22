@@ -1,12 +1,13 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "users")
@@ -22,15 +23,6 @@ public class User extends Person {
 
   }
 
-  @Override
-  public String toString() {
-    return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
-      .add("preferences=" + preferences)
-      .add("password='" + password + "'")
-      .add("items=" + items)
-      .toString();
-  }
-
   public User(String firstName, String lastName, String email, Preferences preferences, String password) {
     super(firstName, lastName, email);
     this.preferences = preferences;
@@ -40,6 +32,14 @@ public class User extends Person {
   public User(Preferences preferences, String password) {
     this.preferences = preferences;
     this.password = password;
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", User.class.getSimpleName() + "[", "]").add("preferences=" + preferences)
+      .add("password='" + password + "'")
+      .add("items=" + items)
+      .toString();
   }
 
   public Preferences getPreferences() {
