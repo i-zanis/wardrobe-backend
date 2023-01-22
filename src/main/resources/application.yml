@@ -4,10 +4,8 @@ spring:
     console:
       enabled: true  # set to true to enable the H2 console
       path: /h2-console  # path at which the console will be available
-  datasource:
-    url: jdbc:h2:mem:testdb  # URL of the H2 database
-    username: sa  # username for the H2 database, default is "sa"
-
+#   datasource:
+#     url: jdbc:h2:mem:testdb  # URL of the H2 database
 
 # spring:
 #   datasource:

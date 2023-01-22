@@ -89,8 +89,10 @@ public class BootStrapData implements CommandLineRunner {
       .withColors(Set.of(Color.BLUE, Color.WHITE))
       .withUser(user1)
       .build();
-    user1.getItems().add(item1);
-    user1.getItems().add(item2);
+    user1.getItems()
+      .add(item1);
+    user1.getItems()
+      .add(item2);
     userService.save(user1);
     List<Item> items = itemService.findAllByUserId(user1.getId());
     logger.info("User {} has {} {}.", user1.getFirstName(), items.size(), items.get(0));
@@ -99,7 +101,8 @@ public class BootStrapData implements CommandLineRunner {
     logger.info("Boostrap items found: {}", items.size());
     List<Item> items1 = (List<Item>) itemRepository.findAll();
     for (Item item : items1) {
-      logger.info("Item: {} {}", item, item.getId(), item.getUser().getId());
+      logger.info("Item: {} {} {}", item, item.getId(), item.getUser()
+        .getId());
     }
     logger.info("-------------------------------");
   }

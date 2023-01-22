@@ -31,8 +31,6 @@ public class BaseEntity implements Serializable {
     this.id = id;
   }
 
-  // override equals and hashcode
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend.utils;
+package io.noblackhole.wardrobe.wardrobebackend.util;
 
 public class Constants {
   public static final String EMPTY_STRING = "";
