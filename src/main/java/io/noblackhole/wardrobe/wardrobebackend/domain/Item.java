@@ -89,21 +89,6 @@ public class Item extends BaseEntity {
     colors.add(color);
   }
 
-  @Override
-  public String toString() {
-    return new StringJoiner(", ", Item.class.getSimpleName() + "[", "]").add("colors=" + colors)
-      .add("brand='" + brand + "'")
-      .add("category=" + category)
-      .add("user=" + user)
-      .add("price=" + price)
-      .add("image=" + Arrays.toString(image))
-      .add("material='" + material + "'")
-      .add("location='" + location + "'")
-      .add("care='" + care + "'")
-      .add("notes='" + notes + "'")
-      .toString();
-  }
-
   public Set<Color> getColors() {
     return colors;
   }

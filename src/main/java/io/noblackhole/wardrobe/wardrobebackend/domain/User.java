@@ -34,13 +34,6 @@ public class User extends Person {
     this.password = password;
   }
 
-  @Override
-  public String toString() {
-    return new StringJoiner(", ", User.class.getSimpleName() + "[", "]").add("preferences=" + preferences)
-      .add("password='" + password + "'")
-      .add("items=" + items)
-      .toString();
-  }
 
   public Preferences getPreferences() {
     return preferences;
