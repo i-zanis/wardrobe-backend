@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringJoiner;
 
 @Entity
 @Table(name = "users")

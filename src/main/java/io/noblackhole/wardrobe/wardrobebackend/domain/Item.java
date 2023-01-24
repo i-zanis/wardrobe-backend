@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringJoiner;
 
 @Entity
 @Table(name = "items")
