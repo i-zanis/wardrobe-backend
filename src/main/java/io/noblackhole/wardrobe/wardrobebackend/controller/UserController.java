@@ -1,6 +1,10 @@
 package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.UserDtoMapper;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserItemsDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserPasswordDto;
 import io.noblackhole.wardrobe.wardrobebackend.exception.DuplicateEmailException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
@@ -11,61 +15,84 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(UserController.BASE_URL)
 public class UserController {
   public static final String BASE_URL = "/v1/users";
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-  private static final String RETRIEVING_ALL_USERS = "Retrieving all users from the DB";
-  private static final String RETRIEVING_USER_BY_ID = "Retrieving user with id: {}";
-  private static final String REGISTERING_USER = "Registering user: {}";
 
   private final UserService userService;
+  private final UserDtoMapper userDtoMapper;
 
-  public UserController(UserService userService) {
+  public UserController(UserService userService, UserDtoMapper userDtoMapper) {
     this.userService = userService;
+    this.userDtoMapper = userDtoMapper;
   }
 
   @GetMapping("/all")
-  public List<User> findAll() throws UserNotFoundException, UserServiceException {
+  public List<UserDto> findAll() throws UserNotFoundException, UserServiceException {
     logger.info("Received request to get all users");
-    return userService.findAll();
+    List<User> users = userService.findAll();
+    return users.stream()
+      .map(userDtoMapper::userToUserDto)
+      .collect(Collectors.toList());
   }
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public User findById(@PathVariable Long id) throws UserNotFoundException, UserServiceException {
+  public UserDto findById(@PathVariable Long id) throws UserNotFoundException, UserServiceException {
     logger.info("Received request to get user with id {}", id);
-    return userService.findById(id);
+    return userDtoMapper.userToUserDto(userService.findById(id));
+  }
+
+  @GetMapping("/load/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public UserItemsDto startup(@PathVariable Long id) throws UserNotFoundException, UserServiceException {
+    logger.info("Received request to get user with id {}", id);
+    User user = userService.findById(id);
+    return userDtoMapper.userToUserItemsDto(user);
   }
 
   @PostMapping("")
   @ResponseStatus(HttpStatus.CREATED)
-  public User save(@Valid @RequestBody User user) throws DuplicateEmailException, UserServiceException {
-    logger.info("Received request to save user {}", user);
-    return userService.save(user);
+  public UserDto save(@Valid @RequestBody UserPasswordDto userPasswordDto) throws DuplicateEmailException, UserServiceException {
+    logger.info("Received request to save user {}", userPasswordDto);
+    User user = userDtoMapper.userPasswordDtoToUser(userPasswordDto);
+    return userDtoMapper.userToUserDto(userService.save(user));
   }
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public User update(@PathVariable Long id, @Valid @RequestBody User user) throws UserServiceException {
+  public UserDto update(@PathVariable Long id, @Valid @RequestBody UserDto UserDto) throws UserServiceException {
     logger.info("Received request to update user with id {}", id);
-    return userService.update(user);
+    User user = userService.update(userDtoMapper.userDtoToUser(UserDto));
+    return userDtoMapper.userToUserDto(user);
   }
 
-  public ResponseEntity<User> register(@Valid @RequestBody User user, BindingResult bindingResult) {
+  @PostMapping("/register")
+  public ResponseEntity<UserDto> register(@Valid @RequestBody UserPasswordDto userPasswordDto, BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(null);
     }
     try {
+      User user = userDtoMapper.userPasswordDtoToUser(userPasswordDto);
       User savedUser = userService.save(user);
+      UserDto savedUserDto = userDtoMapper.userToUserDto(savedUser);
       return ResponseEntity.status(HttpStatus.CREATED)
-        .body(savedUser);
+        .body(savedUserDto);
     } catch (Exception e) {
       if (e instanceof DuplicateEmailException) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -76,5 +103,4 @@ public class UserController {
       }
     }
   }
-
 }
