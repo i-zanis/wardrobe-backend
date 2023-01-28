@@ -1,15 +1,28 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Positive;
+import jdk.jfr.Timestamp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "items")
 public class Item extends BaseEntity {
+  @Timestamp
+  @Column(name = "created_at", nullable = false)
+  private final LocalDateTime createdAt = LocalDateTime.now();
   @Enumerated
   private Set<Color> colors = new HashSet<>();
   private String brand;
@@ -26,14 +39,15 @@ public class Item extends BaseEntity {
   private Double price;
   @Lob
   private Byte[] image;
-  private String material;
   // Offer a few options but leave as a String to allow the user to select
   // his own location
-  private String location;
-  private String care;
   private String notes;
+  private String size;
 
-  public Item(Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String material, String location, String care, String notes) {
+  public Item() {
+  }
+
+  public Item(Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
     this.colors = colors;
     this.brand = brand;
     this.category = category;
@@ -42,13 +56,11 @@ public class Item extends BaseEntity {
     this.user = user;
     this.price = price;
     this.image = image;
-    this.material = material;
-    this.location = location;
-    this.care = care;
     this.notes = notes;
+    this.size = size;
   }
 
-  public Item(Long id, Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String material, String location, String care, String notes) {
+  public Item(Long id, Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
     super(id);
     this.colors = colors;
     this.brand = brand;
@@ -58,13 +70,16 @@ public class Item extends BaseEntity {
     this.user = user;
     this.price = price;
     this.image = image;
-    this.material = material;
-    this.location = location;
-    this.care = care;
     this.notes = notes;
+    this.size = size;
   }
 
-  public Item() {
+  public String getSize() {
+    return size;
+  }
+
+  public void setSize(String size) {
+    this.size = size;
   }
 
   public Look getLook() {
@@ -135,30 +150,6 @@ public class Item extends BaseEntity {
     this.image = image;
   }
 
-  public String getMaterial() {
-    return material;
-  }
-
-  public void setMaterial(String material) {
-    this.material = material;
-  }
-
-  public String getLocation() {
-    return location;
-  }
-
-  public void setLocation(String location) {
-    this.location = location;
-  }
-
-  public String getCare() {
-    return care;
-  }
-
-  public void setCare(String care) {
-    this.care = care;
-  }
-
   public String getNotes() {
     return notes;
   }
@@ -177,10 +168,8 @@ public class Item extends BaseEntity {
     private User user;
     private Double price;
     private Byte[] image;
-    private String material;
-    private String location;
-    private String care;
     private String notes;
+    private String size;
 
     public Builder() {
     }
@@ -234,28 +223,18 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withMaterial(String material) {
-      this.material = material;
-      return this;
-    }
-
-    public Builder withLocation(String location) {
-      this.location = location;
-      return this;
-    }
-
-    public Builder withCare(String care) {
-      this.care = care;
-      return this;
-    }
-
     public Builder withNotes(String notes) {
       this.notes = notes;
       return this;
     }
 
+    public Builder withSize(String size) {
+      this.size = size;
+      return this;
+    }
+
     public Item build() {
-      Item item = new Item(colors, brand, category, look, isFavorite, user, price, image, material, location, care, notes);
+      Item item = new Item(colors, brand, category, look, isFavorite, user, price, image, notes, size);
       item.setId(id);
       return item;
     }
