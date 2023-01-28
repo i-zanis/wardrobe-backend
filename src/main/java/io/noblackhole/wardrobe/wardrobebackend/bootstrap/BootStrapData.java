@@ -7,7 +7,6 @@ import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
-import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import io.noblackhole.wardrobe.wardrobebackend.service.UserService;
 import org.slf4j.Logger;
@@ -22,16 +21,14 @@ import java.util.Set;
 @Component
 public class BootStrapData implements CommandLineRunner {
   private static final Logger logger = LoggerFactory.getLogger(BootStrapData.class);
-  UserRepository userRepository;
-  UserService userService;
-  ItemRepository itemRepository;
-  ItemService itemService;
+  private final UserService userService;
+  private final ItemRepository itemRepository;
+  private final ItemService itemService;
 
-  public BootStrapData(UserRepository userRepository, UserService userService, ItemRepository itemRepository, ItemService itemService) {
-    this.userRepository = userRepository;
+  public BootStrapData(UserService userService, ItemService itemService, ItemRepository itemRepository) {
     this.userService = userService;
-    this.itemRepository = itemRepository;
     this.itemService = itemService;
+    this.itemRepository = itemRepository;
   }
 
   @Override
