@@ -1,6 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.controller;
 
-import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
@@ -8,7 +9,15 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ItemController.BASE_URL)
@@ -23,14 +32,14 @@ public class ItemController {
 
   @GetMapping("/all/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  public Iterable<Item> findAll(@PathVariable Long userId) throws ItemServiceException {
+  public Iterable<ItemDto> findAll(@PathVariable Long userId) throws ItemServiceException {
     logger.info("Received request to get all items");
     return itemService.findAllByUserId(userId);
   }
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public Item findById(@PathVariable Long id) throws ItemServiceException, ItemNotFoundException {
+  public ItemDto findById(@PathVariable Long id) throws ItemServiceException, ItemNotFoundException {
     logger.info("Received request to get item with id {}", id);
     return itemService.findById(id);
   }
@@ -43,17 +52,16 @@ public class ItemController {
   }
 
   @PutMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void update(@PathVariable Long id, @Valid @RequestBody Item item) throws ItemServiceException {
+  @ResponseStatus(HttpStatus.OK)
+  public ItemDto update(@PathVariable Long id, @Valid @RequestBody ItemDto itemDto) throws ItemServiceException, ItemNotFoundException {
     logger.info("Received request to update item with id {}", id);
-    itemService.update(item);
+    return itemService.update(itemDto);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public Item save(@Valid @RequestBody Item item) throws ItemServiceException {
-    logger.info("Received request to create item: {}", item);
-    return itemService.save(item);
+  public ItemDto save(@Valid @RequestBody ItemCreationDto itemCreationDto) throws ItemServiceException {
+    logger.info("Received request to create item: {}", itemCreationDto);
+    return itemService.save(itemCreationDto);
   }
-
 }
