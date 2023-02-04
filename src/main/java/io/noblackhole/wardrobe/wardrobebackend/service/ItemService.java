@@ -1,22 +1,20 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
-import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
 
 import java.util.List;
 
-
 public interface ItemService {
-  List<Item> findAllByUserId(Long id) throws ItemServiceException;
+  List<ItemDto> findAllByUserId(Long userId) throws ItemServiceException;
 
-  Item findById(Long id) throws ItemServiceException, ItemNotFoundException;
+  ItemDto findById(Long id) throws ItemServiceException, ItemNotFoundException;
 
-  Item save(Item item) throws ItemServiceException;
+  ItemDto save(ItemCreationDto itemCreationDto) throws ItemServiceException;
 
-  Item update(Item item) throws ItemServiceException;
+  ItemDto update(ItemDto itemDto) throws ItemServiceException, ItemNotFoundException;
 
   void deleteById(Long id) throws ItemServiceException;
-
-
 }
