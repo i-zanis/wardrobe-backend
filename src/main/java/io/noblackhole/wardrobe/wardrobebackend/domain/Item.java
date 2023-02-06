@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Positive;
@@ -28,9 +29,8 @@ public class Item extends BaseEntity {
   private String brand;
   @Enumerated(EnumType.STRING)
   private Category category;
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "look_id")
-  private Look look;
+  @ManyToMany(mappedBy = "items")
+  private Set<Look> looks;
   private boolean isFavorite;
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
@@ -39,19 +39,14 @@ public class Item extends BaseEntity {
   private Double price;
   @Lob
   private Byte[] image;
-  // Offer a few options but leave as a String to allow the user to select
-  // his own location
   private String notes;
   private String size;
 
-  public Item() {
-  }
-
-  public Item(Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
+  public Item(Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
     this.colors = colors;
     this.brand = brand;
     this.category = category;
-    this.look = look;
+    this.looks = looks;
     this.isFavorite = isFavorite;
     this.user = user;
     this.price = price;
@@ -60,18 +55,37 @@ public class Item extends BaseEntity {
     this.size = size;
   }
 
-  public Item(Long id, Set<Color> colors, String brand, Category category, Look look, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
+  public Item(Long id, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
     super(id);
     this.colors = colors;
     this.brand = brand;
     this.category = category;
-    this.look = look;
+    this.looks = looks;
     this.isFavorite = isFavorite;
     this.user = user;
     this.price = price;
     this.image = image;
     this.notes = notes;
     this.size = size;
+  }
+
+  public Item() {
+
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public Set<Look> getLooks() {
+    if (looks == null) {
+      looks = new HashSet<>();
+    }
+    return looks;
+  }
+
+  public void setLooks(Set<Look> looks) {
+    this.looks = looks;
   }
 
   public String getSize() {
@@ -80,14 +94,6 @@ public class Item extends BaseEntity {
 
   public void setSize(String size) {
     this.size = size;
-  }
-
-  public Look getLook() {
-    return look;
-  }
-
-  public void setLook(Look look) {
-    this.look = look;
   }
 
   public boolean isFavorite() {
@@ -103,6 +109,9 @@ public class Item extends BaseEntity {
   }
 
   public Set<Color> getColors() {
+    if (colors == null) {
+      colors = new HashSet<>();
+    }
     return colors;
   }
 
@@ -163,7 +172,7 @@ public class Item extends BaseEntity {
     private Set<Color> colors;
     private String brand;
     private Category category;
-    private Look look;
+    private Set<Look> looks;
     private boolean isFavorite;
     private User user;
     private Double price;
@@ -198,8 +207,8 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withLook(Look look) {
-      this.look = look;
+    public Builder withLooks(Set<Look> looks) {
+      this.looks = looks;
       return this;
     }
 
@@ -234,7 +243,7 @@ public class Item extends BaseEntity {
     }
 
     public Item build() {
-      Item item = new Item(colors, brand, category, look, isFavorite, user, price, image, notes, size);
+      Item item = new Item(colors, brand, category, looks, isFavorite, user, price, image, notes, size);
       item.setId(id);
       return item;
     }
