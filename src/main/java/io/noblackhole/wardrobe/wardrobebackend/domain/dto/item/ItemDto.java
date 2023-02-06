@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public record ItemDto(Long id, LocalDateTime createdAt, Set<Color> colors,
-                      String brand, Category category, Set<Look> look,
+                      String brand, Category category, Set<Look> looks,
                       boolean isFavorite, Long userId, Double price,
                       String notes, String size) implements Serializable {
 }
