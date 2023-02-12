@@ -24,25 +24,31 @@ public class Item extends BaseEntity {
   @Timestamp
   @Column(name = "created_at", nullable = false)
   private final LocalDateTime createdAt = LocalDateTime.now();
+  String name;
+  String brand;
+  String size;
   @Enumerated
   private Set<Color> colors = new HashSet<>();
-  private String brand;
+  @ManyToMany(mappedBy = "items")
+  private Set<Tag> tags = new HashSet<>();
   @Enumerated(EnumType.STRING)
   private Category category;
   @ManyToMany(mappedBy = "items")
   private Set<Look> looks;
   private boolean isFavorite;
+  private Double price;
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
   @JoinColumn(name = "user_id")
   private User user;
-  private Double price;
+  private String imageLocalPath;
   @Lob
-  private Byte[] image;
+  private Byte[] imageData;
   private String notes;
-  private String size;
 
-  public Item(Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
+
+  public Item(String name, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, String imageLocalPath, Byte[] imageData, Set<Tag> tags, String notes, String size) {
+    this.name = name;
     this.colors = colors;
     this.brand = brand;
     this.category = category;
@@ -50,13 +56,16 @@ public class Item extends BaseEntity {
     this.isFavorite = isFavorite;
     this.user = user;
     this.price = price;
-    this.image = image;
+    this.imageLocalPath = imageLocalPath;
+    this.imageData = imageData;
+    this.tags = tags;
     this.notes = notes;
     this.size = size;
   }
 
-  public Item(Long id, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] image, String notes, String size) {
+  public Item(Long id, String name, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, String imageLocalPath, Byte[] imageData, Set<Tag> tags, String notes, String size) {
     super(id);
+    this.name = name;
     this.colors = colors;
     this.brand = brand;
     this.category = category;
@@ -64,13 +73,56 @@ public class Item extends BaseEntity {
     this.isFavorite = isFavorite;
     this.user = user;
     this.price = price;
-    this.image = image;
+    this.imageLocalPath = imageLocalPath;
+    this.imageData = imageData;
+    this.tags = tags;
     this.notes = notes;
     this.size = size;
   }
 
   public Item() {
 
+  }
+
+  public Item(Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] imageData, String notes, String size) {
+    this.colors = colors;
+    this.brand = brand;
+    this.category = category;
+    this.looks = looks;
+    this.isFavorite = isFavorite;
+    this.user = user;
+    this.price = price;
+    this.imageData = imageData;
+    this.notes = notes;
+    this.size = size;
+  }
+
+  public Set<Tag> getTags() {
+    if (tags == null) tags = new HashSet<>();
+    return tags;
+  }
+
+  public void setTags(Set<Tag> tags) {
+    if (tags == null) {
+      tags = new HashSet<>();
+    }
+    this.tags = tags;
+  }
+
+  public String getImageLocalPath() {
+    return imageLocalPath;
+  }
+
+  public void setImageLocalPath(String imageLocalPath) {
+    this.imageLocalPath = imageLocalPath;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public LocalDateTime getCreatedAt() {
@@ -94,6 +146,14 @@ public class Item extends BaseEntity {
 
   public void setSize(String size) {
     this.size = size;
+  }
+
+  public Byte[] getImageData() {
+    return imageData;
+  }
+
+  public void setImageData(Byte[] imageData) {
+    this.imageData = imageData;
   }
 
   public boolean isFavorite() {
@@ -152,11 +212,11 @@ public class Item extends BaseEntity {
   }
 
   public Byte[] getImage() {
-    return image;
+    return imageData;
   }
 
-  public void setImage(Byte[] image) {
-    this.image = image;
+  public void setImage(Byte[] imageData) {
+    this.imageData = imageData;
   }
 
   public String getNotes() {
@@ -169,6 +229,8 @@ public class Item extends BaseEntity {
 
   public static final class Builder {
     private @Positive Long id;
+    private LocalDateTime createdAt;
+    private String name;
     private Set<Color> colors;
     private String brand;
     private Category category;
@@ -176,7 +238,9 @@ public class Item extends BaseEntity {
     private boolean isFavorite;
     private User user;
     private Double price;
-    private Byte[] image;
+    private String imageLocalPath;
+    private Byte[] imageData;
+    private Set<Tag> tag;
     private String notes;
     private String size;
 
@@ -189,6 +253,16 @@ public class Item extends BaseEntity {
 
     public Builder withId(Long id) {
       this.id = id;
+      return this;
+    }
+
+    public Builder withCreatedAt(LocalDateTime createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder withName(String name) {
+      this.name = name;
       return this;
     }
 
@@ -227,8 +301,18 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withImage(Byte[] image) {
-      this.image = image;
+    public Builder withImageLocalPath(String imageLocalPath) {
+      this.imageLocalPath = imageLocalPath;
+      return this;
+    }
+
+    public Builder withImageData(Byte[] imageData) {
+      this.imageData = imageData;
+      return this;
+    }
+
+    public Builder withTag(Set<Tag> tag) {
+      this.tag = tag;
       return this;
     }
 
@@ -243,8 +327,11 @@ public class Item extends BaseEntity {
     }
 
     public Item build() {
-      Item item = new Item(colors, brand, category, looks, isFavorite, user, price, image, notes, size);
+      Item item = new Item(colors, brand, category, looks, isFavorite, user, price, imageData, notes, size);
       item.setId(id);
+      item.setName(name);
+      item.setImageLocalPath(imageLocalPath);
+      item.setTags(tag);
       return item;
     }
   }
