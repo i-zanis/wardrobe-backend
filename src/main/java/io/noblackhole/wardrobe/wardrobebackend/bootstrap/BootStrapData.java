@@ -1,49 +1,62 @@
 package io.noblackhole.wardrobe.wardrobebackend.bootstrap;
 
+import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
+import io.noblackhole.wardrobe.wardrobebackend.repository.LookRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 
 @Component
 public class BootStrapData implements CommandLineRunner {
-  private static final Logger logger = LoggerFactory.getLogger(BootStrapData.class);
+
+  private final Logger logger = LoggerFactory.getLogger(BootStrapData.class);
   private final UserRepository userRepository;
   private final ItemRepository itemRepository;
+  private final LookRepository lookRepository;
 
-  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository) {
+  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository, LookRepository lookRepository) {
     this.userRepository = userRepository;
     this.itemRepository = itemRepository;
+    this.lookRepository = lookRepository;
   }
 
   @Override
   public void run(String... args) {
     logger.info("Loading bootstrap data");
-    List<User> users = userRepository.findAll();
-    if (users.isEmpty()) getUsers();
-    logger.info("------Bootstrap data loaded-----");
-    logger.info("-------------------------------");
+
+//    if (userRepository.count() == 0) {
+    createUsers();
+    createItems();
+    createLooks();
+    associateItemsWithLooks();
+//    }
+
+    logger.info("Bootstrap data loaded successfully");
+
+    for (Item i : itemRepository.findAll()) {
+      logger.info("{} - Looks: {}", i.getName(), i.getLooks());
+
+    }
   }
 
-  private void getUsers() {
-    User user1 = new User.Builder().withId(1L)
-      .withFirstName("John")
+  private void createUsers() {
+    User user1 = new User.Builder().withFirstName("John")
       .withLastName("Doe")
       .withEmail("johndoe@gmail.com")
       .withPassword("password")
       .build();
 
-    User user2 = new User.Builder().withId(2L)
-      .withFirstName("Jane")
+    User user2 = new User.Builder().withFirstName("Jane")
       .withLastName("Doe")
       .withEmail("janedoe@gmail.com")
       .withPassword("password")
@@ -61,45 +74,95 @@ public class BootStrapData implements CommandLineRunner {
       .withPassword("password")
       .build();
 
-    userRepository.save(user1);
-    userRepository.save(user2);
-    userRepository.save(user3);
-    userRepository.save(user4);
+    userRepository.saveAll(Arrays.asList(user1, user2, user3, user4));
+  }
 
-    Item item1 = new Item.Builder().withId(21L)
-      .withColors(Set.of(Color.BLUE, Color.WHITE))
-      .withUser(user1)
+  private void createItems() {
+    Item item1 = new Item.Builder().withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withUser(userRepository.findById(1L)
+        .get())
       .build();
 
-    Item item2 = new Item.Builder().withId(22L)
-      .withColors(Set.of(Color.BLUE, Color.WHITE))
-      .withUser(user1)
+    Item item2 = new Item.Builder().withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withUser(userRepository.findById(1L)
+        .get())
       .build();
-    Item item3 = new Item.Builder().withId(23L)
-      .withColors(Set.of(Color.AQUA, Color.BEIGE))
-      .withLooks(Set.of(new Look()))
-      .withPrice(100.00)
-      .withBrand("Nike")
+
+    Item item3 = new Item.Builder().withName("My Item")
+      .withBrand("My Brand")
       .withSize("M")
-      .withUser(user1)
+      .withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withCategory(Category.TOP)
+      .withUser(userRepository.findById(1L)
+        .get())
+      .withPrice(99.99)
       .build();
+
+    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
+
+    // Add items to user1
+    User user1 = userRepository.findById(1L)
+      .get();
     user1.getItems()
-      .add(item1);
-    user1.getItems()
-      .add(item2);
-    user1.getItems()
-      .add(item3);
+      .addAll(Arrays.asList(item1, item2, item3));
     userRepository.save(user1);
-    List<Item> items = itemRepository.findAllByUserId(user1.getId());
-    logger.info("User {} has {} {}.", user1.getFirstName(), items.size(), items.get(0));
-    List<User> users = userRepository.findAll();
-    logger.info("Boostrap users found: {}", users.size());
-    logger.info("Boostrap items found: {}", items.size());
-    List<Item> items1 = (List<Item>) itemRepository.findAll();
-    for (Item item : items1) {
-      logger.info("Item: {} {} {}", item, item.getId(), item.getUser()
-        .getId());
-    }
-    logger.info("-------------------------------");
+
+    // Add items to looks
+    Look look1 = lookRepository.findById(1L).ifPresent()
+      .get();
+
+    Look look2 = lookRepository.findById(2L)
+      .get();
+    look1.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
+    look2.getItems()
+      .addAll(Arrays.asList(item2, item3));
+    lookRepository.saveAll(Arrays.asList(look1, look2));
+  }
+
+  private void createLooks() {
+    Look look1 = new Look.Builder().withId(555L)
+      .withName("Look 1")
+      .withDescription("Some description of Look 1")
+      .build();
+
+    Look look2 = new Look.Builder().withId(6666L)
+      .withName("Look 2")
+      .withDescription("Some description of Look 2")
+      .build();
+
+    lookRepository.saveAll(Arrays.asList(look1, look2));
+  }
+
+  private void associateItemsWithLooks() {
+    // No need to create new items, just get the existing ones
+    Item item1 = itemRepository.findById(1L)
+      .get();
+    Item item2 = itemRepository.findById(2L)
+      .get();
+    Item item3 = itemRepository.findById(3L)
+      .get();
+
+    // Add looks to items
+    Look look1 = lookRepository.findById(1L)
+      .get();
+    Look look2 = lookRepository.findById(2L)
+      .get();
+    item1.getLooks()
+      .add(look1);
+    item1.getLooks()
+      .add(look2);
+    item2.getLooks()
+      .add(look1);
+    item2.getLooks()
+      .add(look2);
+    item3.getLooks()
+      .add(look1);
+    look1.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
+    look2.getItems()
+      .addAll(Arrays.asList(item1, item2));
+    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
+    lookRepository.saveAll(Arrays.asList(look1, look2));
   }
 }
