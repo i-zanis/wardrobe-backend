@@ -2,6 +2,8 @@ package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
@@ -15,8 +17,11 @@ import java.util.Set;
 @Entity
 @Table(name = "tags")
 public class Tag extends BaseEntity {
+  @Column(unique = true)
   String name;
-  @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER)
+
+  @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//  @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Fetch(FetchMode.JOIN)
   @JsonBackReference
   @JsonIgnore
