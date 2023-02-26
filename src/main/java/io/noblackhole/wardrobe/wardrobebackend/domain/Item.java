@@ -1,12 +1,14 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -29,13 +31,20 @@ public class Item extends BaseEntity {
   String size;
   @Enumerated
   private Set<Color> colors = new HashSet<>();
-  @ManyToMany(mappedBy = "items")
+
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "item_tag", joinColumns = @JoinColumn(name = "item_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+  @JsonManagedReference
   private Set<Tag> tags = new HashSet<>();
+
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "item_look", joinColumns = @JoinColumn(name = "item_id"), inverseJoinColumns = @JoinColumn(name = "look_id"))
+  @JsonManagedReference
+  private Set<Look> looks = new HashSet<>();
+
+  private boolean isFavorite;
   @Enumerated(EnumType.STRING)
   private Category category;
-  @ManyToMany(mappedBy = "items")
-  private Set<Look> looks;
-  private boolean isFavorite;
   private Double price;
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
@@ -108,6 +117,7 @@ public class Item extends BaseEntity {
     }
     this.tags = tags;
   }
+
 
   public String getImageLocalPath() {
     return imageLocalPath;
