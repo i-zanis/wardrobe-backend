@@ -4,9 +4,11 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
+import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.LookRepository;
+import io.noblackhole.wardrobe.wardrobebackend.repository.TagRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +25,13 @@ public class BootStrapData implements CommandLineRunner {
   private final UserRepository userRepository;
   private final ItemRepository itemRepository;
   private final LookRepository lookRepository;
+  private final TagRepository tagRepository;
 
-  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository, LookRepository lookRepository) {
+  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository, LookRepository lookRepository, TagRepository tagRepository) {
     this.userRepository = userRepository;
     this.itemRepository = itemRepository;
     this.lookRepository = lookRepository;
+    this.tagRepository = tagRepository;
   }
 
   @Override
@@ -36,8 +40,9 @@ public class BootStrapData implements CommandLineRunner {
 
 //    if (userRepository.count() == 0) {
     createUsers();
-    createItems();
     createLooks();
+    createTags();
+    createItems();
     associateItemsWithLooks();
 //    }
 
@@ -47,6 +52,12 @@ public class BootStrapData implements CommandLineRunner {
       logger.info("{} - Looks: {}", i.getName(), i.getLooks());
 
     }
+  }
+
+  private void createTags() {
+    Tag tag1 = new Tag(1L, "Tag 1");
+    Tag tag2 = new Tag(2L, "Tag 2");
+    tagRepository.saveAll(Arrays.asList(tag1, tag2));
   }
 
   private void createUsers() {
@@ -108,9 +119,8 @@ public class BootStrapData implements CommandLineRunner {
     userRepository.save(user1);
 
     // Add items to looks
-    Look look1 = lookRepository.findById(1L).ifPresent()
+    Look look1 = lookRepository.findById(1L)
       .get();
-
     Look look2 = lookRepository.findById(2L)
       .get();
     look1.getItems()
@@ -118,6 +128,16 @@ public class BootStrapData implements CommandLineRunner {
     look2.getItems()
       .addAll(Arrays.asList(item2, item3));
     lookRepository.saveAll(Arrays.asList(look1, look2));
+
+    Tag tag1 = tagRepository.findById(1L)
+      .get();
+    Tag tag2 = tagRepository.findById(2L)
+      .get();
+    tag1.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
+    tag2.getItems()
+      .addAll(Arrays.asList(item2, item3));
+    tagRepository.saveAll(Arrays.asList(tag1, tag2));
   }
 
   private void createLooks() {
@@ -162,7 +182,28 @@ public class BootStrapData implements CommandLineRunner {
       .addAll(Arrays.asList(item1, item2, item3));
     look2.getItems()
       .addAll(Arrays.asList(item1, item2));
-    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
+
+    // Add tags to items
+    Tag tag1 = tagRepository.findById(1L)
+      .get();
+    Tag tag2 = tagRepository.findById(1L  ).get();
+    item1.getTags()
+      .add(tag1);
+    item2.getTags()
+      .add(tag1);
+    item2.getTags()
+      .add(tag2);
+    item3.getTags()
+      .add(tag1);
+    tag1.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
+    tag2.getItems()
+      .addAll(Arrays.asList(item1, item2));
+
+    tag1.getItems().addAll(Arrays.asList(item1, item2, item3));
+    tag2.getItems().addAll(Arrays.asList(item1, item2, item3));
     lookRepository.saveAll(Arrays.asList(look1, look2));
+    tagRepository.saveAll(Arrays.asList(tag1, tag2));
+    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
   }
 }
