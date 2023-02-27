@@ -1,21 +1,18 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserCreationDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDtoBase;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 public interface UserService {
-  List<User> findAll() throws UserServiceException, UserNotFoundException;
+  UserDtoBase findById(Long id, Boolean isFullLoad) throws UserServiceException, UserNotFoundException;
 
-  User findById(Long id) throws UserServiceException, UserNotFoundException;
+  UserDto save(UserCreationDto userCreationDto) throws UserServiceException;
 
-
-  User save(User user) throws UserServiceException;
-
-  User update(User user) throws UserServiceException;
+  UserDto update(UserDto userDto) throws UserServiceException;
 
   Boolean login(String email, String password) throws UserServiceException;
 
