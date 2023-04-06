@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Positive;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -21,7 +22,6 @@ public class Tag extends BaseEntity {
   String name;
 
   @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//  @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Fetch(FetchMode.JOIN)
   @JsonBackReference
   @JsonIgnore
@@ -67,5 +67,41 @@ public class Tag extends BaseEntity {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public static final class Builder {
+    private @Positive Long id;
+    private String name;
+    private Set<Item> items;
+
+    public Builder() {
+    }
+
+    public static Builder aTag() {
+      return new Builder();
+    }
+
+    public Builder withId(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder withName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder withItems(Set<Item> items) {
+      this.items = items;
+      return this;
+    }
+
+    public Tag build() {
+      Tag tag = new Tag();
+      tag.setId(id);
+      tag.setName(name);
+      tag.setItems(items);
+      return tag;
+    }
   }
 }

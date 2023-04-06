@@ -2,8 +2,8 @@ package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -61,7 +61,12 @@ public class ItemController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ItemDto save(@Valid @RequestBody ItemCreationDto itemCreationDto) throws ItemServiceException {
-    logger.info("Received request to create item: {}", itemCreationDto);
+    logger.info("Saving item {}", itemCreationDto);
+//    logger.debug("Received request to create item: {}", itemCreationDto);
+    Byte[] imageData = itemCreationDto.imageData();
+//    for (var tag : itemCreationDto.tags()) {
+//      logger.info("Tag: {}", tag.getName());
+//    }
     return itemService.save(itemCreationDto);
   }
 }

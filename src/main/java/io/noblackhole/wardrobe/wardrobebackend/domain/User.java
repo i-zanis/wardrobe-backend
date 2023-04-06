@@ -1,7 +1,12 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -19,7 +24,6 @@ public class User extends Person {
   private Set<Item> items = new HashSet<>();
 
   public User() {
-
   }
 
   public User(String firstName, String lastName, String email, Preferences preferences, String password) {

@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend.exception;
+package io.noblackhole.wardrobe.wardrobebackend.exception.item;
 
 public class ItemNotFoundException extends Exception {
   public ItemNotFoundException(String message) {

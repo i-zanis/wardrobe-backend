@@ -1,7 +1,6 @@
 package io.noblackhole.wardrobe.wardrobebackend.bootstrap;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
-import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
@@ -27,7 +26,12 @@ public class BootStrapData implements CommandLineRunner {
   private final LookRepository lookRepository;
   private final TagRepository tagRepository;
 
-  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository, LookRepository lookRepository, TagRepository tagRepository) {
+  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository
+    , LookRepository lookRepository
+
+,                       TagRepository tagRepository
+ )
+  {
     this.userRepository = userRepository;
     this.itemRepository = itemRepository;
     this.lookRepository = lookRepository;
@@ -49,7 +53,10 @@ public class BootStrapData implements CommandLineRunner {
     logger.info("Bootstrap data loaded successfully");
 
     for (Item i : itemRepository.findAll()) {
-      logger.info("{} - Looks: {}", i.getName(), i.getLooks());
+      logger.info("{} - Looks: {}", i.getName()
+        ,
+        i.getLooks()
+        );
 
     }
   }
@@ -89,12 +96,12 @@ public class BootStrapData implements CommandLineRunner {
   }
 
   private void createItems() {
-    Item item1 = new Item.Builder().withColors(Set.of(Color.BLUE, Color.WHITE))
+    Item item1 = new Item.Builder().withColors(Set.of("Blue", "White"))
       .withUser(userRepository.findById(1L)
         .get())
       .build();
 
-    Item item2 = new Item.Builder().withColors(Set.of(Color.BLUE, Color.WHITE))
+    Item item2 = new Item.Builder().withColors(Set.of("Black", "Red"))
       .withUser(userRepository.findById(1L)
         .get())
       .build();
@@ -102,7 +109,7 @@ public class BootStrapData implements CommandLineRunner {
     Item item3 = new Item.Builder().withName("My Item")
       .withBrand("My Brand")
       .withSize("M")
-      .withColors(Set.of(Color.BLUE, Color.WHITE))
+      .withColors(Set.of("Black", "Red"))
       .withCategory(Category.TOP)
       .withUser(userRepository.findById(1L)
         .get())
@@ -158,6 +165,7 @@ public class BootStrapData implements CommandLineRunner {
     // No need to create new items, just get the existing ones
     Item item1 = itemRepository.findById(1L)
       .get();
+    logger.info("Item 1: {}", item1);
     Item item2 = itemRepository.findById(2L)
       .get();
     Item item3 = itemRepository.findById(3L)
@@ -183,7 +191,7 @@ public class BootStrapData implements CommandLineRunner {
     look2.getItems()
       .addAll(Arrays.asList(item1, item2));
 
-    // Add tags to items
+//     Add tags to items
     Tag tag1 = tagRepository.findById(1L)
       .get();
     Tag tag2 = tagRepository.findById(1L  ).get();
@@ -203,7 +211,7 @@ public class BootStrapData implements CommandLineRunner {
     tag1.getItems().addAll(Arrays.asList(item1, item2, item3));
     tag2.getItems().addAll(Arrays.asList(item1, item2, item3));
     lookRepository.saveAll(Arrays.asList(look1, look2));
-    tagRepository.saveAll(Arrays.asList(tag1, tag2));
-    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
+//    tagRepository.saveAll(Arrays.asList(tag1, tag2));
+//    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
   }
 }

@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend.exception;
+package io.noblackhole.wardrobe.wardrobebackend.exception.item;
 
 public class ItemServiceException extends Exception {
   public ItemServiceException(String message) {

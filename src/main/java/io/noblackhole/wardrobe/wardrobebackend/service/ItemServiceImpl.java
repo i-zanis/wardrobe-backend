@@ -5,32 +5,39 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.DtoMapper;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.TagRepository;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 public class ItemServiceImpl implements ItemService {
-  private static final Logger logger = LoggerFactory.getLogger(ItemServiceImpl.class);
+  private static final Logger logger =
+    LoggerFactory.getLogger(ItemServiceImpl.class);
   private final TagRepository tagRepository;
   ItemRepository itemRepository;
-  DtoMapper itemDtoMapper;
+  DtoMapper mapper;
 
-  public ItemServiceImpl(ItemRepository itemRepository, DtoMapper itemDtoMapper, TagRepository tagRepository) {
+  public ItemServiceImpl(ItemRepository itemRepository, DtoMapper mapper,
+                         TagRepository tagRepository) {
     this.itemRepository = itemRepository;
-    this.itemDtoMapper = itemDtoMapper;
+    this.mapper = mapper;
     this.tagRepository = tagRepository;
   }
 
@@ -39,24 +46,23 @@ public class ItemServiceImpl implements ItemService {
     logger.info("Finding items with userId: {}", userId);
     try {
       List<Item> items = itemRepository.findAllByUserId(userId);
-//      items.forEach(item -> {
-//        Hibernate.initialize(item.getLooks());
-//      });
+      items.forEach(item -> Hibernate.initialize(item.getLooks()));
       return items.stream()
-        .map(itemDtoMapper::itemToItemDto)
-        .collect(Collectors.toList());
+        .map(mapper::itemToItemDto)
+        .collect(toList());
     } catch (DataAccessException e) {
       throw new ItemServiceException("Error finding items with userId: " + userId, e);
     }
   }
 
   @Override
-  public ItemDto findById(Long id) throws ItemServiceException, ItemNotFoundException {
-    logger.info("Finding item with id " + id);
+  public ItemDto findById(Long id) throws ItemServiceException,
+    ItemNotFoundException {
+    logger.info("Finding item with id {}", id);
     try {
       Optional<Item> item = itemRepository.findById(id);
       if (item.isPresent()) {
-        return itemDtoMapper.itemToItemDto(item.get());
+        return mapper.itemToItemDto(item.get());
       }
       throw new ItemNotFoundException();
     } catch (DataAccessException e) {
@@ -67,33 +73,34 @@ public class ItemServiceImpl implements ItemService {
   @Transactional
   @Override
   public ItemDto save(ItemCreationDto itemCreationDto) throws ItemServiceException {
-    logger.info("Saving item {}", itemCreationDto);
-
+    logger.debug("Saving item {}", itemCreationDto);
     try {
-      Item item = itemDtoMapper.itemCreationDtoToItem(itemCreationDto);
-
-      Set<Tag> existingTags = new HashSet<>();
-      Set<Tag> tagsToSave = new HashSet<>();
-
-      for (Tag tag : item.getTags()) {
-        Tag existingTag = tagRepository.findByName(tag.getName());
-        if (existingTag == null) {
-          tagsToSave.add(tag);
-        } else {
-          existingTags.add(existingTag);
-        }
-      }
-
-      item.setTags(existingTags);
-      tagRepository.saveAll(tagsToSave);
-
+      Item item = mapper.itemCreationDtoToItem(itemCreationDto);
+      Set<String> tagNames = item.getTags()
+        .stream()
+        .map(Tag::getName)
+        .collect(toSet());
+      Set<Tag> existingTags = tagRepository.findByNameIn(tagNames);
+      Map<String, Tag> existingTagsMap = existingTags.stream()
+        .collect(Collectors.toMap(Tag::getName, Function.identity()));
+      Set<Tag> newTags = item.getTags()
+        .stream()
+        .filter(tag -> !existingTagsMap.containsKey(tag.getName()))
+        .collect(toSet());
+      tagRepository.saveAll(newTags);
+      Set<Tag> combinedTags = item.getTags()
+        .stream()
+        .map(tag -> existingTagsMap.getOrDefault(tag.getName(), tag))
+        .collect(toSet());
+      item.setTags(combinedTags);
       Item savedItem = itemRepository.save(item);
-      return itemDtoMapper.itemToItemDto(savedItem);
+      return mapper.itemToItemDto(savedItem);
     } catch (DataAccessException e) {
       logger.error("Error saving item", e);
       throw new ItemServiceException("Item cannot be saved", e);
     }
   }
+
 
   @Override
   public ItemDto update(ItemDto itemDto) throws ItemServiceException {
@@ -102,9 +109,9 @@ public class ItemServiceImpl implements ItemService {
 //      throw new ItemServiceException("User is required");
 //    }
     try {
-      Item item = itemDtoMapper.itemDtoToItem(itemDto);
+      Item item = mapper.itemDtoToItem(itemDto);
       Item savedItem = itemRepository.save(item);
-      return itemDtoMapper.itemToItemDto(savedItem);
+      return mapper.itemToItemDto(savedItem);
     } catch (DataAccessException e) {
       throw new ItemServiceException("Item cannot be updated", e);
     }
@@ -112,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public void deleteById(Long id) throws ItemServiceException {
-    logger.info("Deleting item with id " + id);
+    logger.info("Deleting item with id {}", id);
     try {
       itemRepository.deleteById(id);
     } catch (DataAccessException e) {

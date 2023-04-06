@@ -4,8 +4,8 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDtoBase;
-import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
-import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserServiceException;
 
 public interface UserService {
   UserDtoBase findById(Long id, Boolean isFullLoad) throws UserServiceException, UserNotFoundException;

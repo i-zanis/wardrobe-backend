@@ -2,8 +2,8 @@ package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemNotFoundException;
-import io.noblackhole.wardrobe.wardrobebackend.exception.ItemServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
 
 import java.util.List;
 

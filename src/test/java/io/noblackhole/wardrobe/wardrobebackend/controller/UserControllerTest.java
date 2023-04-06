@@ -3,8 +3,10 @@ package io.noblackhole.wardrobe.wardrobebackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.noblackhole.wardrobe.wardrobebackend.TestUser;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.DtoMapper;
 import io.noblackhole.wardrobe.wardrobebackend.exception.GlobalExceptionHandler;
-import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.service.UserService;
 import io.noblackhole.wardrobe.wardrobebackend.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,14 +19,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
@@ -35,6 +41,7 @@ public class UserControllerTest {
   @InjectMocks
   private UserController userController;
   private MockMvc mockMvc;
+  private DtoMapper userDtoMapper;
 
   @BeforeEach
   void setUp() {
@@ -57,30 +64,20 @@ public class UserControllerTest {
   @Test
   void shouldReturnError_WhenUserNotFound() throws Exception {
     Long nonExistingId = 55555L;
-    when(userService.findById(nonExistingId)).thenThrow(UserNotFoundException.class);
+    when(userService.findById(nonExistingId, null)).thenThrow(UserNotFoundException.class);
     mockMvc.perform(get(UserController.BASE_URL + "/{id}", nonExistingId))
       .andExpect(status().isNotFound());
-    verify(userService, times(1)).findById(nonExistingId);
-  }
-
-  @Test
-  void should() throws Exception {
-    List<User> expectedUsers = Arrays.asList(user1, user2);
-    when(userService.findAll()).thenReturn(expectedUsers);
-    mockMvc.perform(get(UserController.BASE_URL + "/all"))
-      .andExpect(status().isOk())
-      .andExpect(content().json(objectMapper.writeValueAsString(expectedUsers)));
-    verify(userService, times(1)).findAll();
+    verify(userService, times(1)).findById(nonExistingId, null);
   }
 
   @Test
   void findById_shouldReturnOk() throws Exception {
     User expectedUser = user1;
-    when(userService.findById(1L)).thenReturn(expectedUser);
+    when(userService.findById(1L, null)).thenReturn(userDtoMapper.userToUserDto(expectedUser));
     mockMvc.perform(get(UserController.BASE_URL + "/1"))
       .andExpect(status().isOk())
       .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
-    verify(userService, times(1)).findById(1L);
+    verify(userService, times(1)).findById(1L, null);
   }
 
   @Test
@@ -123,8 +120,8 @@ public class UserControllerTest {
 
   @Test
   void save_validUser_shouldReturnCreatedResponseWithSavedUser() throws Exception {
-    User expectedUser = TestUser.create1();
-    when(userService.save(expectedUser)).thenReturn(expectedUser);
+    User expectedUser = TestUser.createUser1();
+    when(userService.save(any())).thenReturn(userDtoMapper.userToUserDto(expectedUser));
     String json = objectMapper.writeValueAsString(expectedUser);
     mockMvc.perform(post(UserController.BASE_URL).content(json)
         .contentType(MediaType.APPLICATION_JSON))
@@ -135,13 +132,14 @@ public class UserControllerTest {
 
   @Test
   void update_validUser_shouldReturnOkResponseWithUpdatedUser() throws Exception {
-    User expectedUser = TestUser.create1();
-    when(userService.update(expectedUser)).thenReturn(expectedUser);
+    User expectedUser = TestUser.createUser1();
+    UserDto userDto = userDtoMapper.userToUserDto(expectedUser);
+    when(userService.update(any())).thenReturn(userDto);
     String json = objectMapper.writeValueAsString(expectedUser);
-    mockMvc.perform(put(UserController.BASE_URL + "/" + expectedUser.getId()).content(json)
+    mockMvc.perform(put(UserController.BASE_URL + "/" + userDto.id()).content(json)
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(content().json(objectMapper.writeValueAsString(expectedUser)));
+      .andExpect(content().json(objectMapper.writeValueAsString(userDto)));
   }
 
 //  @Test

@@ -14,8 +14,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
   @NotNull List<User> findAll();
 
-  Optional<User> findByEmail(String email);
-
   @NonNull
   Optional<User> findById(@NonNull Long id);
 

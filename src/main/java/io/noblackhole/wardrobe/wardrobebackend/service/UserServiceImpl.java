@@ -1,8 +1,12 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
-import io.noblackhole.wardrobe.wardrobebackend.exception.UserNotFoundException;
-import io.noblackhole.wardrobe.wardrobebackend.exception.UserServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.DtoMapper;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserCreationDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
+import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDtoBase;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +15,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,38 +31,27 @@ public class UserServiceImpl implements UserService {
   private static final String SAVING_USER = "Saving user: {}";
   private static final String RETRIEVING_ALL_USERS = "Retrieving all users from the DB";
   private final UserRepository userRepository;
+  private final DtoMapper dtoMapper;
 
-  public UserServiceImpl(UserRepository userRepository) {
+  public UserServiceImpl(UserRepository userRepository, DtoMapper dtoMapper) {
     this.userRepository = userRepository;
-  }
-
-  @Override
-  public List<User> findAll() throws UserServiceException, UserNotFoundException {
-    logger.info(RETRIEVING_ALL_USERS);
-    try {
-      List<User> users = userRepository.findAll();
-      logger.info("Found {} users", users.size());
-      if (users.isEmpty()) {
-        throw new UserNotFoundException();
-      }
-      return users;
-    } catch (DataAccessException e) {
-      throw new UserServiceException(ERROR_RETRIEVING_ALL_USERS, e);
-    }
+    this.dtoMapper = dtoMapper;
   }
 
   @Override
   @Cacheable(value = "users", key = "#id")
-  public User findById(Long id) throws UserServiceException, UserNotFoundException {
+  public UserDtoBase findById(Long id, Boolean isFullLoad) throws UserServiceException, UserNotFoundException {
     logger.info(RETRIEVING_USER_BY_ID, id);
     try {
       Optional<User> user = userRepository.findById(id);
       if (user.isPresent()) {
-        logger.info("Found user: {} {}", user.get().getId(), user.get().getFirstName());
-        return user.get();
-      } else {
-        throw new UserNotFoundException();
+        logger.info("Found user: {}", user);
+        if (isFullLoad != null && isFullLoad) {
+          return dtoMapper.userToUserItemsDto(user.get());
+        }
+        return dtoMapper.userToUserDto(user.get());
       }
+      throw new UserNotFoundException();
     } catch (DataAccessException e) {
       throw new UserServiceException(String.format(ERROR_RETRIEVING_USER_BY_ID, id), e);
     }
@@ -67,27 +59,35 @@ public class UserServiceImpl implements UserService {
 
   @Transactional
   @Override
-  public User save(User user) throws UserServiceException {
-    logger.info(SAVING_USER, user);
-    if (user == null) {
-      throw new UserServiceException("User cannot be null");
-    }
+  public UserDto save(UserCreationDto userPasswordDto) throws UserServiceException {
+    logger.info(SAVING_USER, userPasswordDto);
+    validateUserNotNull(userPasswordDto);
     try {
-      return userRepository.save(user);
+      User user = dtoMapper.userCreationDtoToUser(userPasswordDto);
+      user = userRepository.save(user);
+      return dtoMapper.userToUserDto(user);
     } catch (DataAccessException e) {
-      throw new UserServiceException(String.format(ERROR_SAVING_USER, user), e);
+      throw new UserServiceException(String.format(ERROR_SAVING_USER, userPasswordDto), e);
     }
   }
 
   @Transactional
   @Override
-  public User update(User user) throws UserServiceException {
-    logger.info(UPDATING_USER, user);
-    // The invalid data checks are inside save()
+  public UserDto update(UserDto userDto) throws UserServiceException {
+    logger.info(UPDATING_USER, userDto);
+    validateUserNotNull(userDto);
+    User user = dtoMapper.userDtoToUser(userDto);
     try {
-      return save(user);
+      user = userRepository.save(user);
+      return dtoMapper.userToUserDto(user);
     } catch (DataAccessException e) {
-      throw new UserServiceException(String.format(ERROR_UPDATING_USER, user), e);
+      throw new UserServiceException(String.format(ERROR_UPDATING_USER, userDto), e);
+    }
+  }
+
+  void validateUserNotNull(Object object) throws UserServiceException {
+    if (object == null) {
+      throw new UserServiceException("User cannot be null");
     }
   }
 

@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend.exception;
+package io.noblackhole.wardrobe.wardrobebackend.exception.user;
 
 public class UserNotFoundException extends Exception {
   public UserNotFoundException(String message) {

@@ -4,9 +4,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jdk.jfr.Timestamp;
+
+import java.time.LocalDateTime;
 
 @MappedSuperclass
 public class Person extends BaseEntity {
+  @Timestamp
+  @Column(name = "created_at", nullable = false)
+  private final LocalDateTime createdAt = LocalDateTime.now();
   @Column(name = "first_name")
   @NotBlank(message = "First name is required")
   private String firstName;
@@ -17,6 +23,19 @@ public class Person extends BaseEntity {
   @Email(message = "Email must be valid")
   private String email;
 
+  public Person(String firstName, String lastName, String email, LocalDateTime createdAt) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+  }
+
+  public Person(Long id, String firstName, String lastName, String email, LocalDateTime createdAt) {
+    super(id);
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+  }
+
   public Person(String firstName, String lastName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
@@ -25,6 +44,10 @@ public class Person extends BaseEntity {
 
   public Person() {
 
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
   }
 
   public String getFirstName() {

@@ -1,26 +1,109 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain.dto.item;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
-import io.noblackhole.wardrobe.wardrobebackend.domain.Color;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 
-import java.util.Set;
+import java.io.Serializable;
+import java.util.List;
 
-public record ItemCreationDto(
-  Long id,
-  String name,
-  String brand,
-  String size,
-  Set<Color> colors,
-  Set<Tag> tags,
-  Category category,
-  Set<Look> looks,
-  boolean isFavorite,
-  Long userId,
-  Double price,
-  String imageLocalPath,
-  Byte[] imageData,
-  String notes
-) {
+public record ItemCreationDto(Long id, String name, String brand, String size,
+                              List<String> colors, List<Tag> tags,
+                              Category category, List<Look> looks, Long userId,
+                              Double price, String imageLocalPath,
+                              Byte[] imageData,
+                              String notes) implements Serializable {
+
+  public static final class Builder {
+    private Long id;
+    private String name;
+    private String brand;
+    private String size;
+    private List<String> colors;
+    private List<Tag> tags;
+    private Category category;
+    private List<Look> looks;
+    private Long userId;
+    private Double price;
+    private String imageLocalPath;
+    private Byte[] imageData;
+    private String notes;
+
+    public Builder() {
+    }
+
+    public static Builder anItemCreationDto() {
+      return new Builder();
+    }
+
+    public Builder withId(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder withName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder withBrand(String brand) {
+      this.brand = brand;
+      return this;
+    }
+
+    public Builder withSize(String size) {
+      this.size = size;
+      return this;
+    }
+
+    public Builder withColors(List<String> colors) {
+      this.colors = colors;
+      return this;
+    }
+
+    public Builder withTags(List<Tag> tags) {
+      this.tags = tags;
+      return this;
+    }
+
+    public Builder withCategory(Category category) {
+      this.category = category;
+      return this;
+    }
+
+    public Builder withLooks(List<Look> looks) {
+      this.looks = looks;
+      return this;
+    }
+
+    public Builder withUserId(Long userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder withPrice(Double price) {
+      this.price = price;
+      return this;
+    }
+
+    public Builder withImageLocalPath(String imageLocalPath) {
+      this.imageLocalPath = imageLocalPath;
+      return this;
+    }
+
+    public Builder withImageData(Byte[] imageData) {
+      this.imageData = imageData;
+      return this;
+    }
+
+    public Builder withNotes(String notes) {
+      this.notes = notes;
+      return this;
+    }
+
+    public ItemCreationDto build() {
+      return new ItemCreationDto(id, name, brand, size, colors, tags, category,
+        looks, userId, price, imageLocalPath, imageData, notes);
+    }
+  }
 }

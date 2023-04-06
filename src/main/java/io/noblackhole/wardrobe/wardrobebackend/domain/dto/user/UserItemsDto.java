@@ -5,9 +5,11 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-import java.io.Serializable;
 import java.util.List;
 
+/**
+ * This class is used to send data on app startup.
+ */
 public record UserItemsDto(
   @NotBlank(message = "Id is required") Long id,
   @NotBlank(message = "First name is required") String firstName,
@@ -16,5 +18,5 @@ public record UserItemsDto(
   String email,
   PreferencesDto preferences,
   List<ItemDto> items
-) implements Serializable {
+) implements UserDtoBase {
 }

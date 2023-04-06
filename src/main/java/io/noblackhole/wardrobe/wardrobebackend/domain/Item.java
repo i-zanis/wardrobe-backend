@@ -2,13 +2,14 @@ package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.Positive;
 import jdk.jfr.Timestamp;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,22 +31,23 @@ public class Item extends BaseEntity {
   String name;
   String brand;
   String size;
-  @Enumerated
-  private Set<Color> colors = new HashSet<>();
-
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "item_tag", joinColumns = @JoinColumn(name = "item_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+  @ElementCollection
+  private Set<String> colors = new HashSet<>();
+  @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+//  @JoinTable(name = "item_tag", joinColumns = @JoinColumn(name = "item_id")
+//  , inverseJoinColumns = @JoinColumn(name = "tag_id"))
   @JsonManagedReference
   private Set<Tag> tags = new HashSet<>();
-
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "item_look", joinColumns = @JoinColumn(name = "item_id"), inverseJoinColumns = @JoinColumn(name = "look_id"))
-  @JsonManagedReference
-  private Set<Look> looks = new HashSet<>();
 
   private boolean isFavorite;
   @Enumerated(EnumType.STRING)
   private Category category;
+
+  @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+//  @JoinTable(name = "items_looks", joinColumns = @JoinColumn(name =
+//  "item_id"), inverseJoinColumns = @JoinColumn(name = "look_id"))
+  @JsonManagedReference
+  private Set<Look> looks = new HashSet<>();
   private Double price;
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
@@ -55,76 +58,51 @@ public class Item extends BaseEntity {
   private Byte[] imageData;
   private String notes;
 
-
-  public Item(String name, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, String imageLocalPath, Byte[] imageData, Set<Tag> tags, String notes, String size) {
+  public Item(String name, String brand, String size, Set<String> colors,
+              Set<Tag> tags, boolean isFavorite, Category category,
+              Set<Look> looks, Double price, User user, String imageLocalPath
+    , Byte[] imageData, String notes) {
     this.name = name;
-    this.colors = colors;
     this.brand = brand;
+    this.size = size;
+    this.colors = colors;
+    this.tags = tags;
+    this.isFavorite = isFavorite;
     this.category = category;
     this.looks = looks;
-    this.isFavorite = isFavorite;
-    this.user = user;
     this.price = price;
+    this.user = user;
     this.imageLocalPath = imageLocalPath;
     this.imageData = imageData;
-    this.tags = tags;
     this.notes = notes;
-    this.size = size;
   }
 
-  public Item(Long id, String name, Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, String imageLocalPath, Byte[] imageData, Set<Tag> tags, String notes, String size) {
+  public Item(Long id, String name, String brand, String size,
+              Set<String> colors, Set<Tag> tags, boolean isFavorite,
+              Category category, Set<Look> looks, Double price, User user,
+              String imageLocalPath, Byte[] imageData, String notes) {
     super(id);
     this.name = name;
-    this.colors = colors;
     this.brand = brand;
+    this.size = size;
+    this.colors = colors;
+    this.tags = tags;
+    this.isFavorite = isFavorite;
     this.category = category;
     this.looks = looks;
-    this.isFavorite = isFavorite;
-    this.user = user;
     this.price = price;
+    this.user = user;
     this.imageLocalPath = imageLocalPath;
     this.imageData = imageData;
-    this.tags = tags;
     this.notes = notes;
-    this.size = size;
   }
 
   public Item() {
 
   }
 
-  public Item(Set<Color> colors, String brand, Category category, Set<Look> looks, boolean isFavorite, User user, Double price, Byte[] imageData, String notes, String size) {
-    this.colors = colors;
-    this.brand = brand;
-    this.category = category;
-    this.looks = looks;
-    this.isFavorite = isFavorite;
-    this.user = user;
-    this.price = price;
-    this.imageData = imageData;
-    this.notes = notes;
-    this.size = size;
-  }
-
-  public Set<Tag> getTags() {
-    if (tags == null) tags = new HashSet<>();
-    return tags;
-  }
-
-  public void setTags(Set<Tag> tags) {
-    if (tags == null) {
-      tags = new HashSet<>();
-    }
-    this.tags = tags;
-  }
-
-
-  public String getImageLocalPath() {
-    return imageLocalPath;
-  }
-
-  public void setImageLocalPath(String imageLocalPath) {
-    this.imageLocalPath = imageLocalPath;
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
   }
 
   public String getName() {
@@ -135,19 +113,12 @@ public class Item extends BaseEntity {
     this.name = name;
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
+  public String getBrand() {
+    return brand;
   }
 
-  public Set<Look> getLooks() {
-    if (looks == null) {
-      looks = new HashSet<>();
-    }
-    return looks;
-  }
-
-  public void setLooks(Set<Look> looks) {
-    this.looks = looks;
+  public void setBrand(String brand) {
+    this.brand = brand;
   }
 
   public String getSize() {
@@ -158,12 +129,21 @@ public class Item extends BaseEntity {
     this.size = size;
   }
 
-  public Byte[] getImageData() {
-    return imageData;
+  public Set<String> getColors() {
+    return colors;
   }
 
-  public void setImageData(Byte[] imageData) {
-    this.imageData = imageData;
+  public void setColors(Set<String> colors) {
+    this.colors = colors;
+  }
+
+  public Set<Tag> getTags() {
+    if (tags == null) return Collections.emptySet();
+    return tags;
+  }
+
+  public void setTags(Set<Tag> tags) {
+    this.tags = tags;
   }
 
   public boolean isFavorite() {
@@ -174,29 +154,6 @@ public class Item extends BaseEntity {
     isFavorite = favorite;
   }
 
-  public void addColor(Color color) {
-    colors.add(color);
-  }
-
-  public Set<Color> getColors() {
-    if (colors == null) {
-      colors = new HashSet<>();
-    }
-    return colors;
-  }
-
-  public void setColors(Set<Color> colors) {
-    this.colors = colors;
-  }
-
-  public String getBrand() {
-    return brand;
-  }
-
-  public void setBrand(String brand) {
-    this.brand = brand;
-  }
-
   public Category getCategory() {
     return category;
   }
@@ -205,12 +162,12 @@ public class Item extends BaseEntity {
     this.category = category;
   }
 
-  public User getUser() {
-    return user;
+  public Set<Look> getLooks() {
+    return looks;
   }
 
-  public void setUser(User user) {
-    this.user = user;
+  public void setLooks(Set<Look> looks) {
+    this.looks = looks;
   }
 
   public Double getPrice() {
@@ -221,11 +178,27 @@ public class Item extends BaseEntity {
     this.price = price;
   }
 
-  public Byte[] getImage() {
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public String getImageLocalPath() {
+    return imageLocalPath;
+  }
+
+  public void setImageLocalPath(String imageLocalPath) {
+    this.imageLocalPath = imageLocalPath;
+  }
+
+  public Byte[] getImageData() {
     return imageData;
   }
 
-  public void setImage(Byte[] imageData) {
+  public void setImageData(Byte[] imageData) {
     this.imageData = imageData;
   }
 
@@ -239,20 +212,19 @@ public class Item extends BaseEntity {
 
   public static final class Builder {
     private @Positive Long id;
-    private LocalDateTime createdAt;
     private String name;
-    private Set<Color> colors;
     private String brand;
+    private String size;
+    private Set<String> colors;
+    private Set<Tag> tags;
+    private boolean isFavorite;
     private Category category;
     private Set<Look> looks;
-    private boolean isFavorite;
-    private User user;
     private Double price;
+    private User user;
     private String imageLocalPath;
     private Byte[] imageData;
-    private Set<Tag> tag;
     private String notes;
-    private String size;
 
     public Builder() {
     }
@@ -266,23 +238,33 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withCreatedAt(LocalDateTime createdAt) {
-      this.createdAt = createdAt;
-      return this;
-    }
-
     public Builder withName(String name) {
       this.name = name;
       return this;
     }
 
-    public Builder withColors(Set<Color> colors) {
+    public Builder withBrand(String brand) {
+      this.brand = brand;
+      return this;
+    }
+
+    public Builder withSize(String size) {
+      this.size = size;
+      return this;
+    }
+
+    public Builder withColors(Set<String> colors) {
       this.colors = colors;
       return this;
     }
 
-    public Builder withBrand(String brand) {
-      this.brand = brand;
+    public Builder withTags(Set<Tag> tags) {
+      this.tags = tags;
+      return this;
+    }
+
+    public Builder withIsFavorite(boolean isFavorite) {
+      this.isFavorite = isFavorite;
       return this;
     }
 
@@ -296,18 +278,13 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withIsFavorite(boolean isFavorite) {
-      this.isFavorite = isFavorite;
+    public Builder withPrice(Double price) {
+      this.price = price;
       return this;
     }
 
     public Builder withUser(User user) {
       this.user = user;
-      return this;
-    }
-
-    public Builder withPrice(Double price) {
-      this.price = price;
       return this;
     }
 
@@ -321,27 +298,15 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withTag(Set<Tag> tag) {
-      this.tag = tag;
-      return this;
-    }
-
     public Builder withNotes(String notes) {
       this.notes = notes;
       return this;
     }
 
-    public Builder withSize(String size) {
-      this.size = size;
-      return this;
-    }
-
     public Item build() {
-      Item item = new Item(colors, brand, category, looks, isFavorite, user, price, imageData, notes, size);
+      Item item = new Item(name, brand, size, colors, tags, isFavorite,
+        category, looks, price, user, imageLocalPath, imageData, notes);
       item.setId(id);
-      item.setName(name);
-      item.setImageLocalPath(imageLocalPath);
-      item.setTags(tag);
       return item;
     }
   }

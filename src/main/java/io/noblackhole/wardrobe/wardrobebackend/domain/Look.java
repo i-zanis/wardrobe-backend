@@ -1,6 +1,8 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
@@ -15,9 +17,10 @@ import java.util.Set;
 @Entity
 @Table(name = "looks")
 public class Look extends BaseEntity {
-  @ManyToMany(mappedBy = "looks", fetch = FetchType.EAGER)
+  @ManyToMany(mappedBy = "looks", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Fetch(FetchMode.JOIN)
   @JsonBackReference
+  @JsonIgnore
   private Set<Item> items = new HashSet<>();
   private String name;
   private String description;
@@ -37,6 +40,12 @@ public class Look extends BaseEntity {
   }
 
   public Look(String name, String description) {
+    this.name = name;
+    this.description = description;
+  }
+
+  public Look(Long id, String name, String description) {
+    super(id);
     this.name = name;
     this.description = description;
   }
@@ -78,10 +87,6 @@ public class Look extends BaseEntity {
     private String description;
 
     public Builder() {
-    }
-
-    public static Builder aLook() {
-      return new Builder();
     }
 
     public Builder withId(Long id) {

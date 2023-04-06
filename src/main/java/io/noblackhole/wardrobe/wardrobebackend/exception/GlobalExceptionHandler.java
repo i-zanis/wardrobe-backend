@@ -1,5 +1,9 @@
 package io.noblackhole.wardrobe.wardrobebackend.exception;
 
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundException;
+import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;

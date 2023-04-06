@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend.exception;
+package io.noblackhole.wardrobe.wardrobebackend.exception.user;
 
 import org.springframework.dao.DataAccessException;
 
