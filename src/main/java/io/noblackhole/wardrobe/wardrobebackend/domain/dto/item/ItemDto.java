@@ -5,30 +5,30 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-public record ItemDto(Long id, String name, LocalDateTime createdAt,
+public record ItemDto(Long id, String name, Instant createdAt,
                       String brand, String size, Set<String> colors,
                       List<Tag> tags,
                       Category category,
                       List<Look> looks,
-                      boolean isFavorite, Long userId, Double price,
+                      Boolean isFavorite, Long userId, Double price,
                       String imageLocalPath,
                       // TODO(jtl): to remove imagData
                       Byte[] imageData, String notes) implements Serializable {
   public static final class Builder {
     private Long id;
     private String name;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private String brand;
     private String size;
     private Set<String> colors;
     private List<Tag> tags;
     private Category category;
     private List<Look> looks;
-    private boolean isFavorite;
+    private Boolean isFavorite;
     private Long userId;
     private Double price;
     private String imageLocalPath;
@@ -37,7 +37,6 @@ public record ItemDto(Long id, String name, LocalDateTime createdAt,
 
     public Builder() {
     }
-
 
     public Builder withId(Long id) {
       this.id = id;
@@ -49,7 +48,7 @@ public record ItemDto(Long id, String name, LocalDateTime createdAt,
       return this;
     }
 
-    public Builder withCreatedAt(LocalDateTime createdAt) {
+    public Builder withCreatedAt(Instant createdAt) {
       this.createdAt = createdAt;
       return this;
     }
@@ -84,7 +83,7 @@ public record ItemDto(Long id, String name, LocalDateTime createdAt,
       return this;
     }
 
-    public Builder withIsFavorite(boolean isFavorite) {
+    public Builder withIsFavorite(Boolean isFavorite) {
       this.isFavorite = isFavorite;
       return this;
     }

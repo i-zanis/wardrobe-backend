@@ -23,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ItemController.BASE_URL)
 public class ItemController {
   public static final String BASE_URL = "/v1/items";
-  private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
+  private static final Logger logger =
+    LoggerFactory.getLogger(ItemController.class);
   private final ItemService itemService;
 
   public ItemController(ItemService itemService) {
@@ -39,7 +40,8 @@ public class ItemController {
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemDto findById(@PathVariable Long id) throws ItemServiceException, ItemNotFoundException {
+  public ItemDto findById(@PathVariable Long id) throws ItemServiceException,
+    ItemNotFoundException {
     logger.info("Received request to get item with id {}", id);
     return itemService.findById(id);
   }
@@ -53,7 +55,8 @@ public class ItemController {
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemDto update(@PathVariable Long id, @Valid @RequestBody ItemDto itemDto) throws ItemServiceException, ItemNotFoundException {
+  public ItemDto update(@PathVariable Long id,
+                        @Valid @RequestBody ItemDto itemDto) throws ItemServiceException, ItemNotFoundException {
     logger.info("Received request to update item with id {}", id);
     return itemService.update(itemDto);
   }
@@ -62,11 +65,8 @@ public class ItemController {
   @ResponseStatus(HttpStatus.CREATED)
   public ItemDto save(@Valid @RequestBody ItemCreationDto itemCreationDto) throws ItemServiceException {
     logger.info("Saving item {}", itemCreationDto);
-//    logger.debug("Received request to create item: {}", itemCreationDto);
-    Byte[] imageData = itemCreationDto.imageData();
-//    for (var tag : itemCreationDto.tags()) {
-//      logger.info("Tag: {}", tag.getName());
-//    }
-    return itemService.save(itemCreationDto);
+    ItemDto itemDto = itemService.save(itemCreationDto);
+    logger.info("Saved item {}", itemDto);
+    return itemDto;
   }
 }

@@ -32,7 +32,7 @@ class MapperTest {
     item.setBrand("Nike");
     item.setCategory(Category.TOP);
     item.setLooks(new HashSet<>());
-    item.setFavorite(true);
+    item.setIsFavorite(true);
     item.setUser(TestUser.createUser1());
     item.setPrice(10.59);
     item.setNotes("note");

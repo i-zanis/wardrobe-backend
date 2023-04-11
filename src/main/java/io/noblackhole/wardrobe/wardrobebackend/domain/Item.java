@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Positive;
 import jdk.jfr.Timestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +27,7 @@ import java.util.Set;
 public class Item extends BaseEntity {
   @Timestamp
   @Column(name = "created_at", nullable = false)
-  private final LocalDateTime createdAt = LocalDateTime.now();
+  private final Instant createdAt = Instant.now();
   String name;
   String brand;
   String size;
@@ -39,7 +39,7 @@ public class Item extends BaseEntity {
   @JsonManagedReference
   private Set<Tag> tags = new HashSet<>();
 
-  private boolean isFavorite;
+  private Boolean isFavorite;
   @Enumerated(EnumType.STRING)
   private Category category;
 
@@ -59,7 +59,7 @@ public class Item extends BaseEntity {
   private String notes;
 
   public Item(String name, String brand, String size, Set<String> colors,
-              Set<Tag> tags, boolean isFavorite, Category category,
+              Set<Tag> tags, Boolean isFavorite, Category category,
               Set<Look> looks, Double price, User user, String imageLocalPath
     , Byte[] imageData, String notes) {
     this.name = name;
@@ -78,7 +78,7 @@ public class Item extends BaseEntity {
   }
 
   public Item(Long id, String name, String brand, String size,
-              Set<String> colors, Set<Tag> tags, boolean isFavorite,
+              Set<String> colors, Set<Tag> tags, Boolean isFavorite,
               Category category, Set<Look> looks, Double price, User user,
               String imageLocalPath, Byte[] imageData, String notes) {
     super(id);
@@ -101,7 +101,15 @@ public class Item extends BaseEntity {
 
   }
 
-  public LocalDateTime getCreatedAt() {
+  public Boolean getIsFavorite() {
+    return isFavorite;
+  }
+
+  public void setIsFavorite(Boolean favorite) {
+    isFavorite = favorite;
+  }
+
+  public Instant getCreatedAt() {
     return createdAt;
   }
 
@@ -146,12 +154,8 @@ public class Item extends BaseEntity {
     this.tags = tags;
   }
 
-  public boolean isFavorite() {
+  public Boolean isFavorite() {
     return isFavorite;
-  }
-
-  public void setFavorite(boolean favorite) {
-    isFavorite = favorite;
   }
 
   public Category getCategory() {
@@ -212,12 +216,13 @@ public class Item extends BaseEntity {
 
   public static final class Builder {
     private @Positive Long id;
+    private Instant createdAt;
     private String name;
     private String brand;
     private String size;
     private Set<String> colors;
     private Set<Tag> tags;
-    private boolean isFavorite;
+    private Boolean isFavorite;
     private Category category;
     private Set<Look> looks;
     private Double price;
@@ -227,10 +232,6 @@ public class Item extends BaseEntity {
     private String notes;
 
     public Builder() {
-    }
-
-    public static Builder anItem() {
-      return new Builder();
     }
 
     public Builder withId(Long id) {
@@ -263,7 +264,7 @@ public class Item extends BaseEntity {
       return this;
     }
 
-    public Builder withIsFavorite(boolean isFavorite) {
+    public Builder withIsFavorite(Boolean isFavorite) {
       this.isFavorite = isFavorite;
       return this;
     }

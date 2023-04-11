@@ -9,11 +9,10 @@ import java.util.List;
 
 public record ItemCreationDto(Long id, String name, String brand, String size,
                               List<String> colors, List<Tag> tags,
-                              Category category, List<Look> looks, Long userId,
-                              Double price, String imageLocalPath,
-                              Byte[] imageData,
+                              Boolean isFavorite, Category category,
+                              List<Look> looks, Long userId, Double price,
+                              String imageLocalPath, Byte[] imageData,
                               String notes) implements Serializable {
-
   public static final class Builder {
     private Long id;
     private String name;
@@ -21,6 +20,7 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
     private String size;
     private List<String> colors;
     private List<Tag> tags;
+    private Boolean isFavorite;
     private Category category;
     private List<Look> looks;
     private Long userId;
@@ -32,9 +32,6 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
     public Builder() {
     }
 
-    public static Builder anItemCreationDto() {
-      return new Builder();
-    }
 
     public Builder withId(Long id) {
       this.id = id;
@@ -63,6 +60,11 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
 
     public Builder withTags(List<Tag> tags) {
       this.tags = tags;
+      return this;
+    }
+
+    public Builder withIsFavorite(Boolean isFavorite) {
+      this.isFavorite = isFavorite;
       return this;
     }
 
@@ -102,8 +104,9 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
     }
 
     public ItemCreationDto build() {
-      return new ItemCreationDto(id, name, brand, size, colors, tags, category,
-        looks, userId, price, imageLocalPath, imageData, notes);
+      return new ItemCreationDto(id, name, brand, size, colors, tags,
+        isFavorite, category, looks, userId, price, imageLocalPath, imageData
+        , notes);
     }
   }
 }
