@@ -159,23 +159,18 @@ class ItemServiceTest {
     Tag tag1 = TestTag.create1();
     Tag tag2 = TestTag.create2();
     ItemCreationDto itemCreationDto = TestItemCreationDto.create1();
-
-    when(tagRepository.findByName(tag1.getName())).thenReturn(tag1);
-    when(tagRepository.findByName(tag2.getName())).thenReturn(tag2);
-
+    when(tagRepository.findByNameIn(Set.of(tag1.getName(), tag2.getName()))).thenReturn(Set.of(tag1, tag2));
     Item item = new Item();
     item.setTags(Set.of(tag1, tag2));
     when(itemDtoMapper.itemCreationDtoToItem(itemCreationDto)).thenReturn(item);
     when(itemRepository.save(item)).thenReturn(item);
-
     ItemDto itemDto = TestItemDto.create1();
     when(itemDtoMapper.itemToItemDto(item)).thenReturn(itemDto);
-
     ItemDto savedItemDto = itemService.save(itemCreationDto);
 
     assertThat(savedItemDto).isEqualTo(itemDto);
-    verify(tagRepository, times(1)).findByName(tag1.getName());
-    verify(tagRepository, times(1)).findByName(tag2.getName());
+    verify(tagRepository, times(1)).findByNameIn(Set.of(tag1.getName(),
+      tag2.getName()));
     verify(itemRepository, times(1)).save(item);
   }
 }
