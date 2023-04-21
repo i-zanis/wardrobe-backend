@@ -12,9 +12,15 @@ import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -25,22 +31,32 @@ public class BootStrapData implements CommandLineRunner {
   private final ItemRepository itemRepository;
   private final LookRepository lookRepository;
   private final TagRepository tagRepository;
+  private final Map<String, Byte[]> images = new HashMap<>();
+  private final ResourceLoader resourceLoader;
 
-  public BootStrapData(UserRepository userRepository, ItemRepository itemRepository
-    , LookRepository lookRepository
-
-,                       TagRepository tagRepository
- )
-  {
+  public BootStrapData(UserRepository userRepository,
+                       ItemRepository itemRepository,
+                       LookRepository lookRepository,
+                       TagRepository tagRepository,
+                       ResourceLoader resourceLoader) {
     this.userRepository = userRepository;
     this.itemRepository = itemRepository;
     this.lookRepository = lookRepository;
     this.tagRepository = tagRepository;
+    this.resourceLoader = resourceLoader;
   }
 
   @Override
   public void run(String... args) {
-    logger.info("Loading bootstrap data");
+
+
+    try {
+      images.put("image1", loadImage("channel-shoes.png"));
+      images.put("image2", loadImage("pleated-skirt.png"));
+      images.put("image3", loadImage("red-white-jumper.png"));
+    } catch (IOException e) {
+      logger.error("Error loading images: ", e);
+    }
 
 //    if (userRepository.count() == 0) {
     createUsers();
@@ -53,17 +69,14 @@ public class BootStrapData implements CommandLineRunner {
     logger.info("Bootstrap data loaded successfully");
 
     for (Item i : itemRepository.findAll()) {
-      logger.info("{} - Looks: {}", i.getName()
-        ,
-        i.getLooks()
-        );
+      logger.info("{} - Looks: {}", i.getName(), i.getLooks());
 
     }
   }
 
   private void createTags() {
-    Tag tag1 = new Tag(1L, "Tag 1");
-    Tag tag2 = new Tag(2L, "Tag 2");
+    Tag tag1 = new Tag(1L, "Shoes");
+    Tag tag2 = new Tag(2L, "Work");
     tagRepository.saveAll(Arrays.asList(tag1, tag2));
   }
 
@@ -96,24 +109,41 @@ public class BootStrapData implements CommandLineRunner {
   }
 
   private void createItems() {
-    Item item1 = new Item.Builder().withColors(Set.of("Blue", "White"))
+    Item item1 = new Item.Builder().withName("Black & Beige Heels")
+      .withBrand("Chanel")
+      .withSize("UK 8, 24.3 cm")
+      .withColors(Set.of("Black", "Beige"))
+      .withNotes("Similar design at XOXO fit size at UK 37")
+      .withCategory(Category.SHOES)
+      .withUser(userRepository.findById(1L)
+        .get())
+      .withImageData(images.get("image1"))
+      .build();
+
+    Item item2 = new Item.Builder().withName("Pleated Skirt")
+      .withBrand("Whistles")
+      .withSize("UK 10")
+      .withPrice(52.99)
+      .withCategory(Category.BOTTOM)
+      .withColors(Set.of("Brown"))
+      .withImageData(images.get("image2"))
+      .withNotes("""
+        Similar design at Zara fit size at UK 10. \nGood for work and casual wear.
+        """)
       .withUser(userRepository.findById(1L)
         .get())
       .build();
 
-    Item item2 = new Item.Builder().withColors(Set.of("Black", "Red"))
-      .withUser(userRepository.findById(1L)
-        .get())
-      .build();
-
-    Item item3 = new Item.Builder().withName("My Item")
-      .withBrand("My Brand")
+    Item item3 = new Item.Builder()
+      .withName("Picasso Rouge")
+      .withBrand("The Breton Shirt")
       .withSize("M")
-      .withColors(Set.of("Black", "Red"))
+      .withColors(Set.of("White", "Red"))
       .withCategory(Category.TOP)
+      .withImageData(images.get("image3"))
       .withUser(userRepository.findById(1L)
         .get())
-      .withPrice(99.99)
+      .withPrice(29.0)
       .build();
 
     itemRepository.saveAll(Arrays.asList(item1, item2, item3));
@@ -194,7 +224,8 @@ public class BootStrapData implements CommandLineRunner {
 //     Add tags to items
     Tag tag1 = tagRepository.findById(1L)
       .get();
-    Tag tag2 = tagRepository.findById(1L  ).get();
+    Tag tag2 = tagRepository.findById(1L)
+      .get();
     item1.getTags()
       .add(tag1);
     item2.getTags()
@@ -208,10 +239,24 @@ public class BootStrapData implements CommandLineRunner {
     tag2.getItems()
       .addAll(Arrays.asList(item1, item2));
 
-    tag1.getItems().addAll(Arrays.asList(item1, item2, item3));
-    tag2.getItems().addAll(Arrays.asList(item1, item2, item3));
+    tag1.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
+    tag2.getItems()
+      .addAll(Arrays.asList(item1, item2, item3));
     lookRepository.saveAll(Arrays.asList(look1, look2));
 //    tagRepository.saveAll(Arrays.asList(tag1, tag2));
 //    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
+  }
+
+  private Byte[] loadImage(String imageName) throws IOException {
+    Resource resource =
+      resourceLoader.getResource("classpath:static/images/" + imageName);
+    byte[] byteArray = Files.readAllBytes(resource.getFile()
+      .toPath());
+    Byte[] wrapperArray = new Byte[byteArray.length];
+    for (int i = 0; i < byteArray.length; i++) {
+      wrapperArray[i] = byteArray[i]; // Autoboxing
+    }
+    return wrapperArray;
   }
 }
