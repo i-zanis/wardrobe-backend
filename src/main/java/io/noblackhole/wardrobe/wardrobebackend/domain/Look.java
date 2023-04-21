@@ -1,10 +1,10 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Positive;
@@ -17,14 +17,17 @@ import java.util.Set;
 @Entity
 @Table(name = "looks")
 public class Look extends BaseEntity {
-  @ManyToMany(mappedBy = "looks", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToMany(mappedBy = "looks", fetch = FetchType.EAGER, cascade =
+    CascadeType.ALL)
   @Fetch(FetchMode.JOIN)
-  @JsonBackReference
-  @JsonIgnore
+  @JsonManagedReference
   private Set<Item> items = new HashSet<>();
   private String name;
   private String description;
-
+  @Lob
+  private Byte[] lookImageData;
+  @Lob
+  private Byte[] lookWithUserImageData;
 
   public Look(Set<Item> items, String name, String description) {
     this.items = items;
@@ -50,8 +53,24 @@ public class Look extends BaseEntity {
     this.description = description;
   }
 
-  public Look() {
 
+  public Look() {
+  }
+
+  public Byte[] getLookImageData() {
+    return lookImageData;
+  }
+
+  public void setLookImageData(Byte[] lookImageData) {
+    this.lookImageData = lookImageData;
+  }
+
+  public Byte[] getLookWithUserImageData() {
+    return lookWithUserImageData;
+  }
+
+  public void setLookWithUserImageData(Byte[] lookWithUserImageData) {
+    this.lookWithUserImageData = lookWithUserImageData;
   }
 
   public Set<Item> getItems() {
@@ -85,8 +104,14 @@ public class Look extends BaseEntity {
     private Set<Item> items;
     private String name;
     private String description;
+    private Byte[] lookImageData;
+    private Byte[] lookWithUserImageData;
 
     public Builder() {
+    }
+
+    public static Builder aLook() {
+      return new Builder();
     }
 
     public Builder withId(Long id) {
@@ -109,12 +134,24 @@ public class Look extends BaseEntity {
       return this;
     }
 
+    public Builder withLookImageData(Byte[] lookImageData) {
+      this.lookImageData = lookImageData;
+      return this;
+    }
+
+    public Builder withLookWithUserImageData(Byte[] lookWithUserImageData) {
+      this.lookWithUserImageData = lookWithUserImageData;
+      return this;
+    }
+
     public Look build() {
       Look look = new Look();
       look.setId(id);
       look.setItems(items);
       look.setName(name);
       look.setDescription(description);
+      look.setLookImageData(lookImageData);
+      look.setLookWithUserImageData(lookWithUserImageData);
       return look;
     }
   }
