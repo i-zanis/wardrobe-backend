@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @MappedSuperclass
 public class BaseEntity implements Serializable {
@@ -44,6 +45,10 @@ public class BaseEntity implements Serializable {
     return Objects.hash(getId());
   }
 
-
-
+  @Override
+  public String toString() {
+    return new StringJoiner(", ")
+      .add("id=" + id)
+      .toString();
+  }
 }
