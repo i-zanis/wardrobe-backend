@@ -1,7 +1,7 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -18,7 +19,6 @@ import jakarta.validation.constraints.Positive;
 import jdk.jfr.Timestamp;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,19 +34,14 @@ public class Item extends BaseEntity {
   @ElementCollection
   private Set<String> colors = new HashSet<>();
   @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-//  @JoinTable(name = "item_tag", joinColumns = @JoinColumn(name = "item_id")
-//  , inverseJoinColumns = @JoinColumn(name = "tag_id"))
-  @JsonManagedReference
   private Set<Tag> tags = new HashSet<>();
-
   private Boolean isFavorite;
   @Enumerated(EnumType.STRING)
   private Category category;
-
   @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-//  @JoinTable(name = "items_looks", joinColumns = @JoinColumn(name =
-//  "item_id"), inverseJoinColumns = @JoinColumn(name = "look_id"))
-  @JsonManagedReference
+  @JoinTable(name = "look_item", joinColumns = @JoinColumn(name = "item_id"),
+    inverseJoinColumns = @JoinColumn(name = "look_id"))
+  @JsonIgnore
   private Set<Look> looks = new HashSet<>();
   private Double price;
   @ManyToOne(fetch = FetchType.LAZY)
@@ -98,14 +93,13 @@ public class Item extends BaseEntity {
   }
 
   public Item() {
-
   }
 
-  public Boolean getIsFavorite() {
+  public Boolean getFavorite() {
     return isFavorite;
   }
 
-  public void setIsFavorite(Boolean favorite) {
+  public void setFavorite(Boolean favorite) {
     isFavorite = favorite;
   }
 
@@ -146,7 +140,7 @@ public class Item extends BaseEntity {
   }
 
   public Set<Tag> getTags() {
-    if (tags == null) return Collections.emptySet();
+    if (tags == null) return new HashSet<>();
     return tags;
   }
 
@@ -216,7 +210,6 @@ public class Item extends BaseEntity {
 
   public static final class Builder {
     private @Positive Long id;
-    private Instant createdAt;
     private String name;
     private String brand;
     private String size;
@@ -232,6 +225,10 @@ public class Item extends BaseEntity {
     private String notes;
 
     public Builder() {
+    }
+
+    public static Builder anItem() {
+      return new Builder();
     }
 
     public Builder withId(Long id) {
