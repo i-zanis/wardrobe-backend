@@ -1,10 +1,13 @@
 package io.noblackhole.wardrobe.wardrobebackend.exception.item;
 
 public class ItemServiceException extends Exception {
-  public ItemServiceException(String message) {
-  }
 
   public ItemServiceException() {
+    super();
+  }
+
+  public ItemServiceException(String message) {
+    super(message);
   }
 
   public ItemServiceException(String message, Throwable cause) {
@@ -14,9 +17,4 @@ public class ItemServiceException extends Exception {
   public ItemServiceException(Throwable cause) {
     super(cause);
   }
-
-  protected ItemServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
-
 }
