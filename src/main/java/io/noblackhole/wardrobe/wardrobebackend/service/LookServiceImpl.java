@@ -1,17 +1,23 @@
 package io.noblackhole.wardrobe.wardrobebackend.service;
 
+import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.look.LookDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.look.LookDtoMapper;
 import io.noblackhole.wardrobe.wardrobebackend.exception.look.LookServiceException;
+import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.LookRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 public class LookServiceImpl implements LookService {
@@ -19,10 +25,13 @@ public class LookServiceImpl implements LookService {
     LoggerFactory.getLogger(LookServiceImpl.class);
   private final LookRepository lookRepository;
   private final LookDtoMapper mapper;
+  private final ItemRepository itemRepository;
 
-  public LookServiceImpl(LookRepository lookRepository, LookDtoMapper mapper) {
+  public LookServiceImpl(LookRepository lookRepository, LookDtoMapper mapper,
+                         ItemRepository itemRepository) {
     this.lookRepository = lookRepository;
     this.mapper = mapper;
+    this.itemRepository = itemRepository;
   }
 
   @Override
@@ -33,9 +42,10 @@ public class LookServiceImpl implements LookService {
     }
     try {
       List<Look> looks = lookRepository.findAllByUserId(userId);
+      logger.info("Found {} looks for user ID: {}", looks.size(), userId);
       return looks.stream()
         .map(mapper::lookToLookDto)
-        .collect(Collectors.toList());
+        .collect(toList());
     } catch (Exception e) {
       throw new LookServiceException("Error finding looks for user ID: " + userId, e);
     }
@@ -58,7 +68,7 @@ public class LookServiceImpl implements LookService {
     }
   }
 
-
+  @Transactional
   @Override
   public LookDto save(LookDto lookDto) throws LookServiceException {
     logger.info("Saving look: {}", lookDto);
@@ -67,12 +77,23 @@ public class LookServiceImpl implements LookService {
     }
     try {
       Look look = mapper.lookDtoToLook(lookDto);
+      Set<Item> managedItems = look.getItems()
+        .stream()
+        .map(item -> item.getId() == null ? itemRepository.save(item) :
+          itemRepository.findById(item.getId())
+            .orElse(item))
+        .collect(toSet());
+      look.setItems(managedItems);
+      managedItems.forEach(item -> item.getLooks()
+        .add(look));
+
       Look savedLook = lookRepository.save(look);
       return mapper.lookToLookDto(savedLook);
     } catch (Exception e) {
       throw new LookServiceException("Error saving look: " + lookDto, e);
     }
   }
+
 
   @Override
   public LookDto update(LookDto lookDto) throws LookServiceException {

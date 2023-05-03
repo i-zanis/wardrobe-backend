@@ -5,9 +5,11 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import java.io.Serializable;
 import java.util.List;
 
-public record LookDto(Long id, List<Item> items, String name,
-                      String description,
-                      Byte[] lookImageData, Byte[] lookWithUserImageData,
+public record LookDto(Long id,
+                      List<Item> items,
+                      String name,
+                      String description, Byte[] lookImageData,
+                      Byte[] lookWithUserImageData,
                       Long userId) implements Serializable {
 
   public static final class Builder {
@@ -20,6 +22,10 @@ public record LookDto(Long id, List<Item> items, String name,
     private Long userId;
 
     public Builder() {
+    }
+
+    public static Builder aLookDto() {
+      return new Builder();
     }
 
     public Builder withId(Long id) {
