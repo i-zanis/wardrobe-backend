@@ -54,17 +54,18 @@ public class BootStrapData implements CommandLineRunner {
       images.put("image1", loadImage("channel-shoes.png"));
       images.put("image2", loadImage("pleated-skirt.png"));
       images.put("image3", loadImage("red-white-jumper.png"));
+      images.put("look1", loadImage("look1.png"));
     } catch (IOException e) {
       logger.error("Error loading images: ", e);
     }
 
-//    if (userRepository.count() == 0) {
-    createUsers();
-    createLooks();
-    createTags();
-    createItems();
-    associateItemsWithLooks();
-//    }
+    if (userRepository.count() == 0) {
+      createUsers();
+      createLooks();
+      createTags();
+      createItems();
+      associateItemsWithLooks();
+    }
 
     logger.info("Bootstrap data loaded successfully");
 
@@ -178,9 +179,15 @@ public class BootStrapData implements CommandLineRunner {
   }
 
   private void createLooks() {
+    Tag tag1 = new Tag(1L, "Spring-Summer");
+    Tag tag2 = new Tag(2L, "Shopping");
+    Tag tag3 = new Tag(3L, "Casual");
+    tagRepository.saveAll(Arrays.asList(tag1, tag2, tag3));
     Look look1 = new Look.Builder().withId(555L)
-      .withName("Look 1")
+      .withName("Day Look")
+//      .withTags(Set.of(tag1, tag2, tag3))
       .withDescription("Some description of Look 1")
+      .withLookImageData(images.get("look1"))
       .build();
 
     Look look2 = new Look.Builder().withId(6666L)
@@ -244,8 +251,6 @@ public class BootStrapData implements CommandLineRunner {
     tag2.getItems()
       .addAll(Arrays.asList(item1, item2, item3));
     lookRepository.saveAll(Arrays.asList(look1, look2));
-//    tagRepository.saveAll(Arrays.asList(tag1, tag2));
-//    itemRepository.saveAll(Arrays.asList(item1, item2, item3));
   }
 
   private Byte[] loadImage(String imageName) throws IOException {
