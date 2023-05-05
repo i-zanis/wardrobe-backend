@@ -1,7 +1,6 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain.dto.item;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
-import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 
 import java.io.Serializable;
@@ -9,14 +8,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-public record ItemDto(Long id, String name, Instant createdAt,
-                      String brand, String size, Set<String> colors,
-                      List<Tag> tags,
-                      Category category,
-                      List<Look> looks,
-                      Boolean isFavorite, Long userId, Double price,
-                      String imageLocalPath,
-                      // TODO(jtl): to remove imagData
+public record ItemDto(Long id, String name, Instant createdAt, String brand,
+                      String size, Set<String> colors, List<Tag> tags,
+                      Category category, Boolean isFavorite, Long userId,
+                      Double price, String imageLocalPath,
+                      // TODO(jtl): to remove imageData
                       Byte[] imageData, String notes) implements Serializable {
   public static final class Builder {
     private Long id;
@@ -27,7 +23,6 @@ public record ItemDto(Long id, String name, Instant createdAt,
     private Set<String> colors;
     private List<Tag> tags;
     private Category category;
-    private List<Look> looks;
     private Boolean isFavorite;
     private Long userId;
     private Double price;
@@ -78,11 +73,6 @@ public record ItemDto(Long id, String name, Instant createdAt,
       return this;
     }
 
-    public Builder withLooks(List<Look> looks) {
-      this.looks = looks;
-      return this;
-    }
-
     public Builder withIsFavorite(Boolean isFavorite) {
       this.isFavorite = isFavorite;
       return this;
@@ -115,8 +105,7 @@ public record ItemDto(Long id, String name, Instant createdAt,
 
     public ItemDto build() {
       return new ItemDto(id, name, createdAt, brand, size, colors, tags,
-        category, looks, isFavorite, userId, price, imageLocalPath, imageData
-        , notes);
+        category, isFavorite, userId, price, imageLocalPath, imageData, notes);
     }
   }
 }

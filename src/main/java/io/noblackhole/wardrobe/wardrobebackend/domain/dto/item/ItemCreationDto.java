@@ -1,7 +1,6 @@
 package io.noblackhole.wardrobe.wardrobebackend.domain.dto.item;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
-import io.noblackhole.wardrobe.wardrobebackend.domain.Look;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 
 import java.io.Serializable;
@@ -10,7 +9,7 @@ import java.util.List;
 public record ItemCreationDto(Long id, String name, String brand, String size,
                               List<String> colors, List<Tag> tags,
                               Boolean isFavorite, Category category,
-                              List<Look> looks, Long userId, Double price,
+                              Long userId, Double price,
                               String imageLocalPath, Byte[] imageData,
                               String notes) implements Serializable {
   public static final class Builder {
@@ -22,7 +21,6 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
     private List<Tag> tags;
     private Boolean isFavorite;
     private Category category;
-    private List<Look> looks;
     private Long userId;
     private Double price;
     private String imageLocalPath;
@@ -31,8 +29,6 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
 
     public Builder() {
     }
-
-
     public Builder withId(Long id) {
       this.id = id;
       return this;
@@ -73,11 +69,6 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
       return this;
     }
 
-    public Builder withLooks(List<Look> looks) {
-      this.looks = looks;
-      return this;
-    }
-
     public Builder withUserId(Long userId) {
       this.userId = userId;
       return this;
@@ -105,8 +96,7 @@ public record ItemCreationDto(Long id, String name, String brand, String size,
 
     public ItemCreationDto build() {
       return new ItemCreationDto(id, name, brand, size, colors, tags,
-        isFavorite, category, looks, userId, price, imageLocalPath, imageData
-        , notes);
+        isFavorite, category, userId, price, imageLocalPath, imageData, notes);
     }
   }
 }
