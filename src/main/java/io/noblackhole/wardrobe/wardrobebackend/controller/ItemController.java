@@ -2,7 +2,6 @@ package io.noblackhole.wardrobe.wardrobebackend.controller;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemDto;
-import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.service.ItemService;
 import jakarta.validation.Valid;
@@ -40,8 +39,7 @@ public class ItemController {
 
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemDto findById(@PathVariable Long id) throws ItemServiceException,
-    ItemNotFoundException {
+  public ItemDto findById(@PathVariable Long id) throws ItemServiceException {
     logger.info("Received request to get item with id {}", id);
     return itemService.findById(id);
   }
@@ -55,9 +53,8 @@ public class ItemController {
 
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemDto update(@PathVariable Long id,
-                        @Valid @RequestBody ItemDto itemDto) throws ItemServiceException, ItemNotFoundException {
-    logger.info("Received request to update item with id {}", id);
+  public ItemDto update(@Valid @RequestBody ItemDto itemDto) throws ItemServiceException {
+    logger.info("Received request to update item with id {}", itemDto.id());
     return itemService.update(itemDto);
   }
 
@@ -65,8 +62,6 @@ public class ItemController {
   @ResponseStatus(HttpStatus.CREATED)
   public ItemDto save(@Valid @RequestBody ItemCreationDto itemCreationDto) throws ItemServiceException {
     logger.info("Saving item {}", itemCreationDto);
-    ItemDto itemDto = itemService.save(itemCreationDto);
-    logger.info("Saved item {}", itemDto);
-    return itemDto;
+    return itemService.save(itemCreationDto);
   }
 }
