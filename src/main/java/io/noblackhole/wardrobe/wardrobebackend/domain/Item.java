@@ -22,75 +22,36 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "items")
-public class Item extends BaseEntity {
-  @Timestamp
-  @Column(name = "created_at", nullable = false)
-  private final Instant createdAt = Instant.now();
-  String name;
-  String brand;
-  String size;
-  @ElementCollection
-  private Set<String> colors = new HashSet<>();
-  @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-  private Set<Tag> tags = new HashSet<>();
-  private Boolean isFavorite;
-  @Enumerated(EnumType.STRING)
-  private Category category;
-  @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-  @JoinTable(name = "look_item", joinColumns = @JoinColumn(name = "item_id"),
-    inverseJoinColumns = @JoinColumn(name = "look_id"))
-  @JsonIgnore
-  private Set<Look> looks = new HashSet<>();
-  private Double price;
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JsonBackReference
-  @JoinColumn(name = "user_id")
-  private User user;
-  private String imageLocalPath;
-  @Lob
-  private Byte[] imageData;
-  private String notes;
-
-  public Item(String name, String brand, String size, Set<String> colors,
-              Set<Tag> tags, Boolean isFavorite, Category category,
-              Set<Look> looks, Double price, User user, String imageLocalPath
-    , Byte[] imageData, String notes) {
-    this.name = name;
-    this.brand = brand;
-    this.size = size;
-    this.colors = colors;
-    this.tags = tags;
-    this.isFavorite = isFavorite;
-    this.category = category;
-    this.looks = looks;
-    this.price = price;
-    this.user = user;
-    this.imageLocalPath = imageLocalPath;
-    this.imageData = imageData;
-    this.notes = notes;
-  }
-
-  public Item(Long id, String name, String brand, String size,
-              Set<String> colors, Set<Tag> tags, Boolean isFavorite,
-              Category category, Set<Look> looks, Double price, User user,
-              String imageLocalPath, Byte[] imageData, String notes) {
-    super(id);
-    this.name = name;
-    this.brand = brand;
-    this.size = size;
-    this.colors = colors;
-    this.tags = tags;
-    this.isFavorite = isFavorite;
-    this.category = category;
-    this.looks = looks;
-    this.price = price;
-    this.user = user;
-    this.imageLocalPath = imageLocalPath;
-    this.imageData = imageData;
-    this.notes = notes;
-  }
+  @Entity
+  @Table(name = "items")
+  public class Item extends BaseEntity {
+    @Timestamp
+    @Column(name = "created_at", nullable = false)
+    private final Instant createdAt = Instant.now();
+    String name;
+    String brand;
+    String size;
+    @ElementCollection
+    private Set<String> colors = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<Tag> tags = new HashSet<>();
+    private Boolean isFavorite;
+    @Enumerated(EnumType.STRING)
+    private Category category;
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @JoinTable(name = "look_item", joinColumns = @JoinColumn(name = "item_id"),
+      inverseJoinColumns = @JoinColumn(name = "look_id"))
+    @JsonIgnore
+    private Set<Look> looks = new HashSet<>();
+    private Double price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @JoinColumn(name = "user_id")
+    private User user;
+    private String imageLocalPath;
+    @Lob
+    private Byte[] imageData;
+    private String notes;
 
   public Item() {
   }
@@ -210,6 +171,7 @@ public class Item extends BaseEntity {
 
   public static final class Builder {
     private @Positive Long id;
+    private Instant createdAt;
     private String name;
     private String brand;
     private String size;
@@ -233,6 +195,11 @@ public class Item extends BaseEntity {
 
     public Builder withId(Long id) {
       this.id = id;
+      return this;
+    }
+
+    public Builder withCreatedAt(Instant createdAt) {
+      this.createdAt = createdAt;
       return this;
     }
 
@@ -302,9 +269,21 @@ public class Item extends BaseEntity {
     }
 
     public Item build() {
-      Item item = new Item(name, brand, size, colors, tags, isFavorite,
-        category, looks, price, user, imageLocalPath, imageData, notes);
+      Item item = new Item();
       item.setId(id);
+      item.setName(name);
+      item.setBrand(brand);
+      item.setSize(size);
+      item.setColors(colors);
+      item.setTags(tags);
+      item.setCategory(category);
+      item.setLooks(looks);
+      item.setPrice(price);
+      item.setUser(user);
+      item.setImageLocalPath(imageLocalPath);
+      item.setImageData(imageData);
+      item.setNotes(notes);
+      item.isFavorite = this.isFavorite;
       return item;
     }
   }
