@@ -20,16 +20,11 @@ public class User extends Person {
   private Preferences preferences;
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String password;
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch =
+    FetchType.EAGER)
   private Set<Item> items = new HashSet<>();
 
   public User() {
-  }
-
-  public User(String firstName, String lastName, String email, Preferences preferences, String password) {
-    super(firstName, lastName, email);
-    this.preferences = preferences;
-    this.password = password;
   }
 
   public User(Preferences preferences, String password) {

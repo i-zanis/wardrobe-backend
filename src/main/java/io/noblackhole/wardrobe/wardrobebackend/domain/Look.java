@@ -27,36 +27,10 @@ public class Look extends BaseEntity {
   @Lob
   private Byte[] lookWithUserImageData;
 
-  public Look(Set<Item> items, String name, String description) {
-    this.items = items;
-    this.name = name;
-    this.description = description;
-  }
-
-  public Look(Long id, Set<Item> items, String name, String description) {
-    super(id);
-    this.items = items;
-    this.name = name;
-    this.description = description;
-  }
-
-  public Look(String name, String description) {
-    this.name = name;
-    this.description = description;
-  }
-
-  public Look(Long id, String name, String description) {
-    super(id);
-    this.name = name;
-    this.description = description;
-  }
-
   public Look() {
   }
 
-  public Byte[] getLookImageData() {
-    return lookImageData;
-  }
+  public Byte[] getLookImageData() {return lookImageData;}
 
   public void setLookImageData(Byte[] lookImageData) {
     this.lookImageData = lookImageData;

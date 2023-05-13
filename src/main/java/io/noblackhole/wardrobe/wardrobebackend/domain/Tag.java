@@ -30,21 +30,7 @@ public class Tag extends BaseEntity {
     this.name = name;
   }
 
-  public Tag(Long id, String name) {
-    super(id);
-    this.name = name;
-  }
 
-  public Tag(String name, Set<Item> items) {
-    this.name = name;
-    this.items = items;
-  }
-
-  public Tag(Long id, String name, Set<Item> items) {
-    super(id);
-    this.name = name;
-    this.items = items;
-  }
 
   public Tag() {
 

@@ -9,23 +9,7 @@ public class Preferences extends BaseEntity {
   Boolean isMetric;
   Boolean isNotificationsEnabled;
 
-  public Preferences(String location, Boolean isDarkMode, Boolean isMetric, Boolean isNotificationsEnabled) {
-    this.location = location;
-    this.isDarkMode = isDarkMode;
-    this.isMetric = isMetric;
-    this.isNotificationsEnabled = isNotificationsEnabled;
-  }
-
-  public Preferences(Long id, String location, Boolean isDarkMode, Boolean isMetric, Boolean isNotificationsEnabled) {
-    super(id);
-    this.location = location;
-    this.isDarkMode = isDarkMode;
-    this.isMetric = isMetric;
-    this.isNotificationsEnabled = isNotificationsEnabled;
-  }
-
   public Preferences() {
-
   }
 
   public String getLocation() {
