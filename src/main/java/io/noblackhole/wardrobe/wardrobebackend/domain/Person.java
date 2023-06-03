@@ -23,25 +23,6 @@ public class Person extends BaseEntity {
   @Email(message = "Email must be valid")
   private String email;
 
-  public Person(String firstName, String lastName, String email, Instant createdAt) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-  }
-
-  public Person(Long id, String firstName, String lastName, String email, Instant createdAt) {
-    super(id);
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-  }
-
-  public Person(String firstName, String lastName, String email) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-  }
-
   public Person() {
 
   }
