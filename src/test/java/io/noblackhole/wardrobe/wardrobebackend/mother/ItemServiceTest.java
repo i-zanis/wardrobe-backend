@@ -1,8 +1,5 @@
-package io.noblackhole.wardrobe.wardrobebackend.service;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
-import io.noblackhole.wardrobe.wardrobebackend.TestItemCreationDto;
-import io.noblackhole.wardrobe.wardrobebackend.TestItemDto;
-import io.noblackhole.wardrobe.wardrobebackend.TestTag;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
@@ -14,6 +11,7 @@ import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemNotFoundExcept
 import io.noblackhole.wardrobe.wardrobebackend.exception.item.ItemServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.ItemRepository;
 import io.noblackhole.wardrobe.wardrobebackend.repository.TagRepository;
+import io.noblackhole.wardrobe.wardrobebackend.service.ItemServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,10 +63,18 @@ class ItemServiceTest {
       .withColors(Set.of("Pink", "White"))
       .build();
 
+    user1 = new User.Builder().withId(1L)
+      .withFirstName("John")
+      .withLastName("Doe")
+      .withEmail("johndoe@gmail.com")
+      .withPassword("password")
+      .build();
+
     itemDto1 = new ItemDto.Builder().withId(11L)
       .withBrand("Hallmark Devilson")
       .withCategory(category1)
       .withColors(Set.of("Blue", "Red"))
+      .withUserId(user1.getId())
       .build();
     itemDto2 = new ItemDto.Builder().withId(12L)
       .withBrand("Tristan's Fate")
@@ -76,12 +82,6 @@ class ItemServiceTest {
       .withColors(Set.of("Pink", "White"))
       .build();
 
-    user1 = new User.Builder().withId(1L)
-      .withFirstName("John")
-      .withLastName("Doe")
-      .withEmail("johndoe@gmail.com")
-      .withPassword("password")
-      .build();
   }
 
   @Test
@@ -103,7 +103,7 @@ class ItemServiceTest {
   }
 
   @Test
-  void findById() throws ItemServiceException, ItemNotFoundException {
+  void findById() throws ItemServiceException {
     when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item1));
     when(itemDtoMapper.itemToItemDto(item1)).thenReturn(itemDto1);
 
@@ -113,7 +113,7 @@ class ItemServiceTest {
 
   @Test
   void save_validItem_shouldApply() throws ItemServiceException {
-    ItemCreationDto itemCreationDto = TestItemCreationDto.create1();
+    ItemCreationDto itemCreationDto = ItemCreationDtoMother.create();
 
     when(itemDtoMapper.itemCreationDtoToItem(itemCreationDto)).thenReturn(item1);
     when(itemRepository.save(item1)).thenReturn(item1);
@@ -156,15 +156,15 @@ class ItemServiceTest {
 
   @Test
   void save_withExistingTags_shouldReuseTags() throws ItemServiceException {
-    Tag tag1 = TestTag.create1();
-    Tag tag2 = TestTag.create2();
-    ItemCreationDto itemCreationDto = TestItemCreationDto.create1();
+    Tag tag1 = TagMother.create1();
+    Tag tag2 = TagMother.create2();
+    ItemCreationDto itemCreationDto = ItemCreationDtoMother.create();
     when(tagRepository.findByNameIn(Set.of(tag1.getName(), tag2.getName()))).thenReturn(Set.of(tag1, tag2));
     Item item = new Item();
     item.setTags(Set.of(tag1, tag2));
     when(itemDtoMapper.itemCreationDtoToItem(itemCreationDto)).thenReturn(item);
     when(itemRepository.save(item)).thenReturn(item);
-    ItemDto itemDto = TestItemDto.create1();
+    ItemDto itemDto = ItemDtoMother.create();
     when(itemDtoMapper.itemToItemDto(item)).thenReturn(itemDto);
     ItemDto savedItemDto = itemService.save(itemCreationDto);
 

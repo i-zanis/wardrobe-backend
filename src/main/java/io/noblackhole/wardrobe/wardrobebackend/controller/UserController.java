@@ -60,26 +60,4 @@ public class UserController {
     return userService.update(userDto);
   }
 
-//  @PostMapping("/register")
-//  public ResponseEntity<UserDto> register(@Valid @RequestBody UserCreationDto userPasswordDto, BindingResult bindingResult) {
-//    if (bindingResult.hasErrors()) {
-//      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//        .body(null);
-//    }
-//    try {
-//      User user = userDtoMapper.userPasswordDtoToUser(userPasswordDto);
-//      User savedUser = userService.save(user);
-//      UserDto savedUserDto = userDtoMapper.userToUserDto(savedUser);
-//      return ResponseEntity.status(HttpStatus.CREATED)
-//        .body(savedUserDto);
-//    } catch (Exception e) {
-//      if (e instanceof DuplicateEmailException) {
-//        return ResponseEntity.status(HttpStatus.CONFLICT)
-//          .build();
-//      } else {
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//          .build();
-//      }
-//    }
-//  }
 }

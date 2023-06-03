@@ -1,13 +1,13 @@
-package io.noblackhole.wardrobe.wardrobebackend;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.PreferencesDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
 
-public class TestUser extends User {
+public class UserMother {
 
-  public static User createUser1() {
+  public static User createUser() {
     return new User.Builder().withId(1L)
       .withFirstName("John")
       .withLastName("Doe")
@@ -34,10 +34,12 @@ public class TestUser extends User {
   }
 
   public static UserDto createUserDto1() {
-    return new UserDto(1L, "John", "Doe", "johndoe@gmail.com", new PreferencesDto(false, true, false));
+    return new UserDto(1L, "John", "Doe", "johndoe@gmail.com",
+      new PreferencesDto(false, true, false));
   }
 
   public static UserDto createUserDto2() {
-    return new UserDto(2L, "Jane", "Doe", "janedoe@gmail.com", new PreferencesDto(false, true, false));
+    return new UserDto(2L, "Jane", "Doe", "janedoe@gmail.com",
+      new PreferencesDto(false, true, false));
   }
 }

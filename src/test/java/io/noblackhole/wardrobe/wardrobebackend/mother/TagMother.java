@@ -1,11 +1,11 @@
-package io.noblackhole.wardrobe.wardrobebackend;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
 
 import java.util.List;
 import java.util.Set;
 
-public class TestTag {
+public class TagMother {
   public static Tag create1() {
     return new Tag.Builder()
       .withId(11111L)

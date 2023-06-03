@@ -39,5 +39,6 @@ public interface DtoMapper {
   @Mapping(target = "tags", source = "tags")
   Item itemDtoToItem(ItemDto itemDto);
 
+  @Mapping(source = "user.id", target = "userId")
   ItemDto itemToItemDto(Item item);
 }

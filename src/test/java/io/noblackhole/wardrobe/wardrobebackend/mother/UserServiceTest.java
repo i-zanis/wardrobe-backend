@@ -1,6 +1,6 @@
-package io.noblackhole.wardrobe.wardrobebackend.service;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
-import io.noblackhole.wardrobe.wardrobebackend.TestUser;
+import io.noblackhole.wardrobe.wardrobebackend.mother.UserMother;
 import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserCreationDto;
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.UserDto;
@@ -9,6 +9,8 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.dto.user.DtoMapper;
 import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundException;
 import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserServiceException;
 import io.noblackhole.wardrobe.wardrobebackend.repository.UserRepository;
+import io.noblackhole.wardrobe.wardrobebackend.service.UserService;
+import io.noblackhole.wardrobe.wardrobebackend.service.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,8 +53,8 @@ class UserServiceTest {
   @Test
   void findById_shouldReturnAUser_whenValidIdIsProvided() throws UserServiceException, UserNotFoundException {
     // Given
-    User expected = TestUser.createUser1();
-    UserDto expectedDto = TestUser.createUserDto1();
+    User expected = UserMother.createUser();
+    UserDto expectedDto = UserMother.createUserDto1();
     when(userRepository.findById(expected.getId())).thenReturn(Optional.of(expected));
     when(userDtoMapper.userToUserDto(expected)).thenReturn(expectedDto);
     // When
@@ -67,9 +69,9 @@ class UserServiceTest {
   void findById_shouldThrowUserServiceException_whenInvalidIdIsProvided() throws UserNotFoundException, UserServiceException {
     // Given
     Long nonExistentId = -1L;
-    User expected = TestUser.createUser1();
+    User expected = UserMother.createUser();
     Long existentId = expected.getId();
-    UserDto expectedDto = TestUser.createUserDto1();
+    UserDto expectedDto = UserMother.createUserDto1();
     when(userRepository.findById(existentId)).thenReturn(Optional.of(expected));
     when(userDtoMapper.userToUserDto(expected)).thenReturn(expectedDto);
     // When
@@ -86,7 +88,7 @@ class UserServiceTest {
   void save_shouldReturnSavedUser_whenValidUserIsProvided() throws UserServiceException, UserNotFoundException {
     // Given
     UserCreationDto userCreationDto = new UserCreationDto("John", "Doe", "johndoe@gmail.com", "john-pass123");
-    User expected = TestUser.createUser1();
+    User expected = UserMother.createUser();
     when(userDtoMapper.userCreationDtoToUser(any())).thenReturn(expected);
     when(userRepository.save(expected)).thenReturn(expected);
     when(userRepository.findById(expected.getId())).thenReturn(Optional.of(expected));
@@ -110,15 +112,15 @@ class UserServiceTest {
   public void save_WhenSaveFails_ShouldThrowUserServiceException() {
     when(userRepository.save(any(User.class))).thenThrow(new DataAccessException("Error saving user") {
     });
-    when(userDtoMapper.userCreationDtoToUser(any(UserCreationDto.class))).thenReturn(TestUser.createUser1());
-    assertThrows(UserServiceException.class, () -> userService.save(TestUser.createCreationDto1()));
+    when(userDtoMapper.userCreationDtoToUser(any(UserCreationDto.class))).thenReturn(UserMother.createUser());
+    assertThrows(UserServiceException.class, () -> userService.save(UserMother.createCreationDto1()));
   }
 
   @Test
   void update_shouldReturnUpdatedUser_whenValidUserIsProvided() throws UserServiceException {
     // Given
-    UserDto userDto = TestUser.createUserDto1();
-    User expected = TestUser.createUser1();
+    UserDto userDto = UserMother.createUserDto1();
+    User expected = UserMother.createUser();
     when(userDtoMapper.userDtoToUser(userDto)).thenReturn(expected);
     when(userRepository.save(expected)).thenReturn(expected);
     when(userDtoMapper.userToUserDto(expected)).thenReturn(userDto);

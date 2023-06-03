@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Item;
@@ -6,15 +6,15 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.User;
 
 import java.util.Set;
 
-public class TestItem extends Item {
+public class ItemMother extends Item {
 
-  public static Item create1() {
-    return create1(null);
+  public static Item create() {
+    return create(null);
   }
 
-  public static Item create1(User user) {
+  public static Item create(User user) {
     if (user == null) {
-      user = TestUser.createUser1();
+      user = UserMother.createUser();
     }
 
     Category category1 = Category.SHOES;
@@ -35,7 +35,7 @@ public class TestItem extends Item {
 
   public static Item create2(User user) {
     if (user == null) {
-      user = TestUser.createUser2();
+      user = UserMother.createUser2();
     }
     Category category = Category.BOTTOM;
     return new Item.Builder().withId(12L)

@@ -14,6 +14,7 @@ public record ItemDto(Long id, String name, Instant createdAt, String brand,
                       Double price, String imageLocalPath,
                       // TODO(jtl): to remove imageData
                       Byte[] imageData, String notes) implements Serializable {
+
   public static final class Builder {
     private Long id;
     private String name;

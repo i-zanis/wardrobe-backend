@@ -1,4 +1,4 @@
-package io.noblackhole.wardrobe.wardrobebackend;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.Category;
 import io.noblackhole.wardrobe.wardrobebackend.domain.Tag;
@@ -6,15 +6,15 @@ import io.noblackhole.wardrobe.wardrobebackend.domain.dto.item.ItemCreationDto;
 
 import java.util.List;
 
-public class TestItemCreationDto {
+public class ItemCreationDtoMother {
 
-  public static ItemCreationDto create1() {
-    return create1(null);
+  public static ItemCreationDto create() {
+    return create(null);
   }
 
-  public static ItemCreationDto create1(Long userId) {
+  public static ItemCreationDto create(Long userId) {
     if (userId == null) {
-      userId = TestUser.createUser1()
+      userId = UserMother.createUser()
         .getId();
     }
 
@@ -23,10 +23,10 @@ public class TestItemCreationDto {
       .withBrand("Gucci")
       .withSize("M")
       .withColors(List.of("BLUE", "RED"))
-      .withTags(TestTag.createList())
+      .withTags(TagMother.createList())
       .withIsFavorite(false)
       .withCategory(Category.TOP)
-      .withLooks(TestLook.createList())
+//      .withLooks(TestLookIdDto.createList())
       .withUserId(userId)
       .withPrice(100.0)
       .withImageLocalPath("C:\\Users\\user\\Pictures\\image1.jpg")
@@ -42,7 +42,7 @@ public class TestItemCreationDto {
 
   public static ItemCreationDto create2(Long userId) {
     if (userId == null) {
-      userId = TestUser.createUser2()
+      userId = UserMother.createUser2()
         .getId();
     }
 
@@ -54,7 +54,7 @@ public class TestItemCreationDto {
       .withTags(List.of(new Tag("Geek"), new Tag("Tee")))
       .withIsFavorite(false)
       .withCategory(Category.TOP)
-      .withLooks(TestLook.createList())
+//      .withLooks(TestLookIdDto.createList())
       .withUserId(userId)
       .withPrice(10.0)
       .withImageLocalPath("C:\\Users\\user\\Pictures\\image2.jpg")

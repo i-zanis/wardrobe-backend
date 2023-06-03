@@ -19,17 +19,18 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-  private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-  private static final String ERROR_RETRIEVING_ALL_USERS = "Error while retrieving all users from the DB";
-  private static final String ERROR_RETRIEVING_USER_BY_ID = "Error while retrieving user with id %d from the DB";
-  private static final String ERROR_RETRIEVING_USER_BY_EMAIL = "Error while retrieving user with email %s from the DB";
-  private static final String ERROR_SAVING_USER = "Error while saving user %s to the DB";
-  private static final String ERROR_UPDATING_USER = "Error while updating user %s to the DB";
-  private static final String RETRIEVING_USER_BY_ID = "Retrieving user with id: {}";
-  private static final String RETRIEVING_USER_BY_EMAIL = "Retrieving user with email: {}";
+  private static final Logger logger =
+    LoggerFactory.getLogger(UserServiceImpl.class);
+  private static final String ERROR_RETRIEVING_USER_BY_ID = "Error while " +
+    "retrieving user with id %d from the DB";
+  private static final String ERROR_SAVING_USER = "Error while saving user %s" +
+    " to the DB";
+  private static final String ERROR_UPDATING_USER = "Error while updating " +
+    "user %s to the DB";
+  private static final String RETRIEVING_USER_BY_ID = "Retrieving user with " +
+    "id: {}";
   private static final String UPDATING_USER = "Updating user: {}";
   private static final String SAVING_USER = "Saving user: {}";
-  private static final String RETRIEVING_ALL_USERS = "Retrieving all users from the DB";
   private final UserRepository userRepository;
   private final DtoMapper dtoMapper;
 
@@ -67,7 +68,8 @@ public class UserServiceImpl implements UserService {
       user = userRepository.save(user);
       return dtoMapper.userToUserDto(user);
     } catch (DataAccessException e) {
-      throw new UserServiceException(String.format(ERROR_SAVING_USER, userPasswordDto), e);
+      throw new UserServiceException(String.format(ERROR_SAVING_USER,
+        userPasswordDto), e);
     }
   }
 
@@ -81,7 +83,8 @@ public class UserServiceImpl implements UserService {
       user = userRepository.save(user);
       return dtoMapper.userToUserDto(user);
     } catch (DataAccessException e) {
-      throw new UserServiceException(String.format(ERROR_UPDATING_USER, userDto), e);
+      throw new UserServiceException(String.format(ERROR_UPDATING_USER,
+        userDto), e);
     }
   }
 

@@ -1,26 +1,26 @@
-package io.noblackhole.wardrobe.wardrobebackend;
+package io.noblackhole.wardrobe.wardrobebackend.mother;
 
 import io.noblackhole.wardrobe.wardrobebackend.domain.dto.look.LookIdDto;
 
 import java.util.List;
 import java.util.Set;
 
-public class TestLookIdDto {
-  static LookIdDto create1() {
+public class LookDtoMother {
+  static LookIdDto createLookIdDto() {
     return new LookIdDto(1111L);
   }
 
 
-  static LookIdDto create2() {
+  static LookIdDto createLookIdDto2() {
     return new LookIdDto(1112L);
   }
 
   public static List<LookIdDto> createList() {
-    return List.of(create1(), create2());
+    return List.of(createLookIdDto(), createLookIdDto2());
   }
 
   Set<LookIdDto> createSet() {
-    return Set.of(create1(), create2());
+    return Set.of(createLookIdDto(), createLookIdDto2());
   }
 }
 

@@ -387,7 +387,7 @@ public class BootStrapData implements CommandLineRunner {
       .toPath());
     Byte[] wrapperArray = new Byte[byteArray.length];
     for (int i = 0; i < byteArray.length; i++) {
-      wrapperArray[i] = byteArray[i]; // Autoboxing
+      wrapperArray[i] = byteArray[i];
     }
     return wrapperArray;
   }

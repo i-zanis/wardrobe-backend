@@ -31,7 +31,7 @@ import java.util.Set;
     String name;
     String brand;
     String size;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> colors = new HashSet<>();
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private Set<Tag> tags = new HashSet<>();
