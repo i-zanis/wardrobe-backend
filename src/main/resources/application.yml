@@ -1,4 +1,3 @@
-# H2 database properties
 spring:
   datasource:
     url: jdbc:h2:file:./data/mydb
@@ -13,26 +12,4 @@ spring:
   logging:
      level:
        root: DEBUG
-# server:
-#   port: 8079
-
-# spring:
-#   datasource:
-#     url: jdbc:mysql://localhost:3306/wardrobe
-#     username: izanis
-#     password: password
-#     platform: mysql
-#   jpa:
-#     hibernate:
-#       ddl-auto: validate
-#     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-#     database: mysql
-#     show-sql: true
-#    properties:
-#      javax:
-#        persistence:
-#          schema-generation:
-#            create-source: metadata
-#            scripts:
-#              action: create
-#              create-target: guru_database_create.sql
+       org.springframework: DEBUG
