@@ -52,7 +52,7 @@ public class ItemController {
   }
 
   @PutMapping("/{id}")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public ItemDto update(@Valid @RequestBody ItemDto itemDto) throws ItemServiceException {
     logger.info("Received request to update item with id {}", itemDto.id());
     return itemService.update(itemDto);
