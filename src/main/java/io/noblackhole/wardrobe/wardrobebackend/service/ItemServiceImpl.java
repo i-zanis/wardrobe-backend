@@ -56,8 +56,7 @@ public class ItemServiceImpl implements ItemService {
   }
 
   @Override
-  public ItemDto findById(Long id) throws ItemServiceException,
-    ItemNotFoundException {
+  public ItemDto findById(Long id) throws ItemServiceException {
     logger.info("Finding item with id {}", id);
     try {
       Optional<Item> item = itemRepository.findById(id);
@@ -72,26 +71,12 @@ public class ItemServiceImpl implements ItemService {
 
   @Transactional
   @Override
-  public ItemDto save(ItemCreationDto itemCreationDto) throws ItemServiceException {
+  public ItemDto save(ItemCreationDto itemCreationDto)
+    throws ItemServiceException {
     logger.debug("Saving item {}", itemCreationDto);
     try {
       Item item = mapper.itemCreationDtoToItem(itemCreationDto);
-      Set<String> tagNames = item.getTags()
-        .stream()
-        .map(Tag::getName)
-        .collect(toSet());
-      Set<Tag> existingTags = tagRepository.findByNameIn(tagNames);
-      Map<String, Tag> existingTagsMap = existingTags.stream()
-        .collect(Collectors.toMap(Tag::getName, Function.identity()));
-      Set<Tag> newTags = item.getTags()
-        .stream()
-        .filter(tag -> !existingTagsMap.containsKey(tag.getName()))
-        .collect(toSet());
-      tagRepository.saveAll(newTags);
-      Set<Tag> combinedTags = item.getTags()
-        .stream()
-        .map(tag -> existingTagsMap.getOrDefault(tag.getName(), tag))
-        .collect(toSet());
+      Set<Tag> combinedTags = processTags(item);
       item.setTags(combinedTags);
       Item savedItem = itemRepository.save(item);
       return mapper.itemToItemDto(savedItem);
@@ -101,13 +86,48 @@ public class ItemServiceImpl implements ItemService {
     }
   }
 
+  private Set<Tag> processTags(Item item) {
+    Set<String> tagNames = extractTagNames(item);
+    Map<String, Tag> existingTagsMap = findExistingTags(tagNames);
+    Set<Tag> newTags = findNewTags(item, existingTagsMap);
+    tagRepository.saveAll(newTags);
+    return combineTags(item, existingTagsMap);
+  }
+
+  private Set<String> extractTagNames(Item item) {
+    return item.getTags()
+      .stream()
+      .map(Tag::getName)
+      .collect(toSet());
+  }
+
+  private Map<String, Tag> findExistingTags(Set<String> tagNames) {
+    Set<Tag> existingTags = tagRepository.findByNameIn(tagNames);
+    return existingTags.stream()
+      .collect(Collectors.toMap(Tag::getName, Function.identity()));
+  }
+
+  private Set<Tag> findNewTags(Item item, Map<String, Tag> existingTagsMap) {
+    return item.getTags()
+      .stream()
+      .filter(tag -> !existingTagsMap.containsKey(tag.getName()))
+      .collect(toSet());
+  }
+
+  private Set<Tag> combineTags(Item item, Map<String, Tag> existingTagsMap) {
+    return item.getTags()
+      .stream()
+      .map(tag -> existingTagsMap.getOrDefault(tag.getName(), tag))
+      .collect(toSet());
+  }
+
 
   @Override
   public ItemDto update(ItemDto itemDto) throws ItemServiceException {
     logger.info("Updating item {}", itemDto);
-//    if (itemDto.userId() == null) {
-//      throw new ItemServiceException("User is required");
-//    }
+    if (itemDto.userId() == null) {
+      throw new ItemServiceException("User is required");
+    }
     try {
       Item item = mapper.itemDtoToItem(itemDto);
       Item savedItem = itemRepository.save(item);
