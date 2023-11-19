@@ -6,8 +6,7 @@ import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserNotFoundExcept
 import io.noblackhole.wardrobe.wardrobebackend.exception.user.UserServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,20 +15,20 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<String> handleDataAccessException(DataAccessException e) {
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(e.getMessage());
+  public String handleDataAccessException(DataAccessException e) {
+    return e.getMessage();
   }
 
   @ExceptionHandler(UserNotFoundException.class)
@@ -73,7 +72,7 @@ public class GlobalExceptionHandler {
         errors.put(fieldName, errorMessage);
       });
     ErrorResponse errorResponse = new ErrorResponse(request.getRequestURI(), errors);
-    logger.error("MethodArgumentNotValidException:" + e.getMessage());
+    log.error("MethodArgumentNotValidException:" + e.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
       .body(errorResponse);
   }
